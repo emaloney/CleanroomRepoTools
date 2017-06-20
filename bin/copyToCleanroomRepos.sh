@@ -3,8 +3,8 @@
 SCRIPT_NAME=$(basename "$0")
 SCRIPT_DIR=$(cd "$PWD" ; cd `dirname "$0"` ; echo "$PWD")
 
-cd "$SCRIPT_DIR"
-source common-include.sh
+cd "$SCRIPT_DIR/.."
+source bin/common-include.sh
 
 showHelp()
 {
@@ -22,13 +22,13 @@ showHelp()
 	printf "\t<relative-path> is the relative path of a file or directory\n"
 	printf "\twithin the instance of the Cleanroom master repository at:\n"
 	echo
-	printf "\t\t$REPO_DIR\n"
+	printf "\t\t$REPO_ROOT_DEFAULT\n"
 	echo
 	printf "\tEach <relative-path> is recursively copied to the appropriate\n"
 	printf "\tlocation in the individual Cleanroom Project repos that exist\n"
-	printf "\tparallel to $REPO_NAME within the directory:\n"
+	printf "\twithin:"
 	echo
-	printf "\t\t$EXEC_DIR\n"
+	printf "\t\t$REPO_ROOT_DEFAULT\n"
 	echo
 	printf "\tThe following Cleanroom Project repos have been detected:\n"
 	echo
@@ -49,6 +49,8 @@ showHelp()
 #
 ARGS=()
 REPO_LIST=()
+REPO_ROOT_DEFAULT="$PWD/.."
+REPO_ROOT="$REPO_ROOT_DEFAULT"
 BRANCH=master
 while [[ $1 ]]; do
 	case $1 in
@@ -72,6 +74,12 @@ while [[ $1 ]]; do
  		done
  		;;
  		
+ 	--root)
+		if [[ $2 ]]; then
+ 			REPO_ROOT=$2
+ 			shift
+ 		fi
+		;;
  		
  	--all|-a)
 		ALL_REPOS_FLAG=1
@@ -104,11 +112,8 @@ if [[ $SHOW_HELP ]]; then
 	exit 1
 fi
 
-cd "$SCRIPT_DIR/../.."
-REPO_DIR="$PWD"
 REPO_NAME=`basename "$PWD"`
-cd ..
-EXEC_DIR="$PWD"
+cd "$REPO_ROOT"
 
 #
 # validate the input
@@ -136,9 +141,6 @@ fi
 # make sure we're being run from the expected place
 #
 expectRepo "$REPO_NAME"
-if [[ "$REPO_NAME" != "Cleanroom" ]]; then
-	confirmationPrompt "WARNING: This script is expected to run within a repo named Cleanroom.\n\nInstead, this script is being run from within $REPO_NAME."
-fi
 
 #
 # ensure all the repos are on the expected branch
@@ -164,7 +166,7 @@ for f in ${ARGS[@]}; do
 		CP_ARGS="i"
 	fi
 	
-	SRCDIR="${REPO_NAME}/Deployment/boilerplate"
+	SRCDIR="${REPO_NAME}/boilerplate"
 	for r in ${REPO_LIST[@]}; do
 		DESTITEM=$( echo "$ITEM" | sed sq^_q.q )
 		echo "Copying $ITEM to $r/${DIR}${DESTITEM}"

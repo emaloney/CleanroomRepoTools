@@ -83,7 +83,7 @@ expectReposOnBranch()
 	#
 	CLEANROOM_BRANCH=`git rev-parse --abbrev-ref HEAD`
 	if [[ $CLEANROOM_BRANCH != $BRANCH ]]; then
-		echo "error: Expected repo containing Cleanroom/Deployment to be on $BRANCH branch; is on $CLEANROOM_BRANCH instead"
+		echo "error: Expected CleanroomRepoTools to be on $BRANCH branch; is on $CLEANROOM_BRANCH instead"
 		exit 2
 	fi
 
@@ -91,9 +91,9 @@ expectReposOnBranch()
 	# make sure all the repos are on the right branch
 	#
 	for r in $@; do
-		REPO_DIR="../../$r"
+		REPO_DIR="$REPO_ROOT/$r"
 		if [[ ! -d "$REPO_DIR" ]]; then
-			echo "error: Didn't find expected git repo for $r at path $PWD/$REPO_DIR"
+			echo "error: Didn't find expected git repo for $r at path $REPO_DIR"
 			exit 3
 		fi
 		pushd "$REPO_DIR" > /dev/null
@@ -116,3 +116,11 @@ CLEANROOM_REPOS=()
 for f in "$SCRIPT_DIR/../repos/"*.xml; do
 	CLEANROOM_REPOS+=(`basename "$f" | sed "s/^repos\///" | sed "s/.xml$//"`)
 done
+
+#
+# find my PlistBuddy
+#
+PLIST_BUDDY=/usr/libexec/PlistBuddy
+if [[ ! -x "$PLIST_BUDDY" ]]; then
+	exitWithErrorSuggestHelp "Expected to find PlistBuddy at path $PLIST_BUDDY"
+fi

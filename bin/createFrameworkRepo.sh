@@ -7,8 +7,9 @@ cd "$SCRIPT_DIR"
 source common-include.sh
 
 PLATE_BIN="$SCRIPT_DIR/plate"
-DEST_ROOT="$SCRIPT_DIR/../../.."
-DEFAULT_DEST_ROOT=$( cd "$DEST_ROOT"; echo $PWD )
+REPO_ROOT="$SCRIPT_DIR/../.."
+REPO_SETTINGS_FILE="$SCRIPT_DIR/../repos/${NEW_REPO_NAME}.xml"
+DEFAULT_REPO_ROOT=$( cd "$REPO_ROOT"; echo $PWD )
 POSSIBLE_PLATFORMS=( iOS macOS tvOS watchOS all )
 REAL_PLATFORMS=${POSSIBLE_PLATFORMS[@]:0:${#POSSIBLE_PLATFORMS[@]}-1}
 POSSIBLE_PLATFORMS_STR=`echo -n "${POSSIBLE_PLATFORMS[@]}"`
@@ -45,8 +46,22 @@ while [[ $1 ]]; do
  		done
  		;;
 
+	--xml)
+ 		while [[ $2 ]]; do
+ 			case $2 in
+ 			-*)
+ 				break
+ 				;;
+ 				
+ 			*)
+				REPO_SETTINGS_FILE="$2"
+		 		shift
+				;;	
+ 			esac
+ 		done
+		;;
 	
-	--dest|-d)
+	--dest|-d|--root)
  		while [[ $2 ]]; do
  			case $2 in
  			-*)
@@ -55,9 +70,9 @@ while [[ $1 ]]; do
  				
  			*)
  				if [[ ${2:0:1} == '/' ]]; then
-					DEST_ROOT="$2"
+					REPO_ROOT="$2"
 				else
-					DEST_ROOT="$PWD/$2"
+					REPO_ROOT="$PWD/$2"
  				fi
 		 		shift
 				;;	
@@ -152,7 +167,7 @@ showHelp()
 	printf "\t\tIf this argument is not provided, newly-created repos will\n"
 	printf "\t\tbe placed within:\n"
 	echo
-	printf "\t\t\t${DEFAULT_DEST_ROOT}\n"
+	printf "\t\t\t${DEFAULT_REPO_ROOT}\n"
 	echo
 	printf "\t--platform ($POSSIBLE_PLATFORMS_PARAM)\n"
 	echo
@@ -189,16 +204,15 @@ if [[ -z "$NEW_REPO_NAME" ]]; then
 	exitWithErrorSuggestHelp "Must provide name of new repo/project"
 fi
 
-DEST_ROOT=$( cd "$DEST_ROOT"; echo $PWD )
-if [[ ! -d "$DEST_ROOT" ]]; then
-	exitWithErrorSuggestHelp "Couldn't find destination directory: $DEST_ROOT"
+REPO_ROOT=$( cd "$REPO_ROOT"; echo $PWD )
+if [[ ! -d "$REPO_ROOT" ]]; then
+	exitWithErrorSuggestHelp "Couldn't find destination directory: $REPO_ROOT"
 fi
 
-if [[ -e "$DEST_ROOT/$NEW_REPO_NAME" && $FORCE_MODE != 1 ]]; then
-	exitWithErrorSuggestHelp "Directory already exists: $DEST_ROOT/$NEW_REPO_NAME" "Use --force (or -f) to override"
+if [[ -e "$REPO_ROOT/$NEW_REPO_NAME" && $FORCE_MODE != 1 ]]; then
+	exitWithErrorSuggestHelp "Directory already exists: $REPO_ROOT/$NEW_REPO_NAME" "Use --force (or -f) to override"
 fi
 
-REPO_SETTINGS_FILE="$SCRIPT_DIR/../repos/${NEW_REPO_NAME}.xml"
 if [[ -z "$REPO_OWNER" && ! -r "$REPO_SETTINGS_FILE" ]]; then
 	exitWithErrorSuggestHelp "The repo's owner must be specified"
 fi
@@ -254,18 +268,18 @@ processDirectory()
 		fi
 		
 		if [[ -d "$f" ]]; then
-			printf "\t${DEST_ROOT}/${DEST_DIR}. <- ${DEST_NAME}/\n"
-			executeCommand "mkdir -p \"${DEST_ROOT}/${DEST_DIR}${DEST_NAME}\""
+			printf "\t${REPO_ROOT}/${DEST_DIR}. <- ${DEST_NAME}/\n"
+			executeCommand "mkdir -p \"${REPO_ROOT}/${DEST_DIR}${DEST_NAME}\""
 			processDirectory "$f" "${DEST_DIR}${DEST_NAME}"
 		elif [[ $( echo "$f" | grep -c "\.boilerplate\$" ) > 0 ]]; then
 			DEST_NAME=$( echo "$DEST_NAME" | sed "s/\.boilerplate\$//" )
-				printf "\t${DEST_ROOT}/${DEST_DIR}${DEST_NAME} <- $f\n"
+				printf "\t${REPO_ROOT}/${DEST_DIR}${DEST_NAME} <- $f\n"
 			CREATOR_USER=`id -un`
 			CREATOR_NAME=`id -F`
 			if [[ -r "$REPO_SETTINGS_FILE" ]]; then
-				$PLATE_BIN -t "$f" -o "${DEST_ROOT}/${DEST_DIR}${DEST_NAME}" -m ../include/repos.xml -d "$REPO_SETTINGS_FILE"
+				$PLATE_BIN -t "$f" -o "${REPO_ROOT}/${DEST_DIR}${DEST_NAME}" -m ../include/repos.xml -d "$REPO_SETTINGS_FILE"
 			else
-				$PLATE_BIN -t "$f" -o "${DEST_ROOT}/${DEST_DIR}${DEST_NAME}" -m ../include/repos.xml --stdin-data <<MBML_BLOCK
+				$PLATE_BIN -t "$f" -o "${REPO_ROOT}/${DEST_DIR}${DEST_NAME}" -m ../include/repos.xml --stdin-data <<MBML_BLOCK
 <MBML>
 	<Var name="repo:owner" literal="${REPO_OWNER}"/>
 	<Var name="project:name" literal="${NEW_REPO_NAME}"/>
@@ -278,27 +292,27 @@ processDirectory()
 MBML_BLOCK
 			fi
 			if [[ $( echo "$DEST_NAME" | grep -c "\.sh\$" ) > 0 ]]; then
-				chmod a+x "${DEST_ROOT}/${DEST_DIR}${DEST_NAME}"
+				chmod a+x "${REPO_ROOT}/${DEST_DIR}${DEST_NAME}"
 			fi
 		else
 			if [[ "$f" == "$DEST_NAME" ]]; then
-				printf "\t${DEST_ROOT}/${DEST_DIR}. <- $f\n"
+				printf "\t${REPO_ROOT}/${DEST_DIR}. <- $f\n"
 			else
-				printf "\t${DEST_ROOT}/${DEST_DIR}${DEST_NAME} <- $f\n"
+				printf "\t${REPO_ROOT}/${DEST_DIR}${DEST_NAME} <- $f\n"
 			fi
-			executeCommand "cp \"$f\" \"${DEST_ROOT}/${DEST_DIR}${DEST_NAME}\""
+			executeCommand "cp \"$f\" \"${REPO_ROOT}/${DEST_DIR}${DEST_NAME}\""
 		fi
 	done
 	popd > /dev/null
 }
 
 cd "$SCRIPT_DIR/../skeletons"
-echo "Creating new Xcode framework project repo $NEW_REPO_NAME in $DEST_ROOT"
+echo "Creating new Xcode framework project repo $NEW_REPO_NAME in $REPO_ROOT"
 processDirectory "framework"
 
 # we need to create the repo first because the freshenRepo.sh script below
 # requires the git repo to already have been created & have at least 1 commit
-pushd "$DEST_ROOT/$NEW_REPO_NAME" > /dev/null
+pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 if [[ ! -d .git ]]; then
 	echo "Creating git repo and performing initial commit"
 	git init
@@ -318,9 +332,9 @@ cd "$SCRIPT_DIR"/..
 expectReposOnBranch "$REPO_BRANCH" "$NEW_REPO_NAME"
 
 echo "Generating boilerplate files"
-./bin/freshenRepo.sh --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG
+./bin/freshenRepo.sh --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT"
 
-pushd "$DEST_ROOT/$NEW_REPO_NAME" > /dev/null
+pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 
 echo "Committing final files to git"
 git add .

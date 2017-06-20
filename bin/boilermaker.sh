@@ -6,7 +6,7 @@ SCRIPT_NAME=$(basename "$0")
 SCRIPT_DIR=$(cd "$PWD" ; cd `dirname "$0"` ; echo "$PWD")
 
 cd "$SCRIPT_DIR/.."
-source "bin/common-include.sh"
+source bin/common-include.sh
 
 #
 # parse the command-line arguments
@@ -14,6 +14,7 @@ source "bin/common-include.sh"
 BRANCH=master
 FILE_LIST=()
 REPO_LIST=()
+REPO_ROOT="$PWD/.."
 while [[ $1 ]]; do
 	case $1 in
 	--help|-h|-\?)
@@ -34,6 +35,14 @@ while [[ $1 ]]; do
  			esac
  		done
  		;;
+	
+	--root)
+		if [[ $2 ]]; then
+ 			REPO_ROOT=$2
+ 			shift
+ 		fi
+		;;
+
 	
  	--repo|-r)
  		REPOS_SPECIFIED=1
@@ -182,14 +191,6 @@ expectReposOnBranch $BRANCH $REPO_LIST
 export BRANCH
 
 #
-# find my PlistBuddy
-#
-PLIST_BUDDY=/usr/libexec/PlistBuddy
-if [[ ! -x "$PLIST_BUDDY" ]]; then
-	exitWithErrorSuggestHelp "Expected to find PlistBuddy at path $PLIST_BUDDY"
-fi
-
-#
 # make sure boilerplate exists for each file specified
 #
 for f in ${FILE_LIST[@]}; do
@@ -211,7 +212,7 @@ for f in ${FILE_LIST[@]}; do
 	echo "Generating $OUTPUT_FILE..."
 	for r in ${REPO_LIST[@]}; do
 		printf "    ...for the $r repo"
-		FRAMEWORK_VERSION=`"$PLIST_BUDDY" "../../$r/BuildControl/Info-Target.plist" -c "Print :CFBundleShortVersionString"`
+		FRAMEWORK_VERSION=`"$PLIST_BUDDY" "$REPO_ROOT/$r/BuildControl/Info-Target.plist" -c "Print :CFBundleShortVersionString"`
 		export FRAMEWORK_VERSION
 		if [[ "$VERSION" ]]; then
 			FRAMEWORK_VERSION_PUBLIC="$VERSION"
@@ -219,14 +220,15 @@ for f in ${FILE_LIST[@]}; do
 			FRAMEWORK_VERSION_PUBLIC=`echo $FRAMEWORK_VERSION | sed "sq\.[0-9]*\\$qq"`
 		fi
 		export FRAMEWORK_VERSION_PUBLIC
+		echo $PWD
 		REPO_XML="repos/${r}.xml"
 		if [[ -r "$REPO_XML" ]]; then
-			mkdir -p "../../$r/$OUTPUT_BASE" && ./bin/plate -t "$BOILERPLATE_FILE" -d "$REPO_XML" -m include/repos.xml -o "../../$r/$OUTPUT_FILE"
+			mkdir -p "$REPO_ROOT/$r/$OUTPUT_BASE" && ./bin/plate -t "$BOILERPLATE_FILE" -d "$REPO_XML" -m include/repos.xml -o "$REPO_ROOT/$r/$OUTPUT_FILE"
 			if [[ "$?" != 0 ]]; then
 				exit 5
 			fi
 			if [[ $(echo "$OUTPUT_FILE" | grep -c "\.sh\$") > 0 ]]; then
-				chmod a+x "../../$r/$OUTPUT_FILE"
+				chmod a+x "$REPO_ROOT/$r/$OUTPUT_FILE"
 			fi
 			printf " (done!)\n"
 		else
@@ -240,7 +242,7 @@ done
 #
 if [[ ! -z "$COMMIT_MESSAGE" ]]; then
 	for r in ${REPO_LIST[@]}; do
-		pushd "../../$r" > /dev/null
+		pushd "$REPO_ROOT/$r" > /dev/null
 		echo "Committing $r"
 		COMMIT_FILES=`printf " \"%s\"" ${FILE_LIST[@]}`
 		git add$COMMIT_FILES

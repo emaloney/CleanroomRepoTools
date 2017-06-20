@@ -7,11 +7,14 @@ BOILERMAKER_ARGS="$@"
 SCRIPT_NAME=$(basename "$0")
 SCRIPT_DIR=$(cd "$PWD" ; cd `dirname "$0"` ; echo "$PWD")
 
-cd "$SCRIPT_DIR"
-source common-include.sh
+cd "$SCRIPT_DIR/.."
+source bin/common-include.sh
 
 REPO_LIST=()
 BRANCH=master
+DEFAULT_REPO_ROOT="$PWD/.."
+REPO_ROOT="$DEFAULT_REPO_ROOT"
+
 while [[ $1 ]]; do
 	case $1 in
 	--repo|-r)
@@ -30,6 +33,13 @@ while [[ $1 ]]; do
  		done
  		;;
  		
+	--root)
+		if [[ $2 ]]; then
+ 			REPO_ROOT=$2
+ 			shift
+ 		fi
+		;;
+
  	--all|-a)
 		ALL_REPOS_FLAG=1
 		;;
@@ -148,9 +158,9 @@ processSubpath()
 processSubpath .
 
 for r in ${REPO_LIST[@]}; do
-	MASTER_XML="$PWD/../include/repos.xml"
-	REPO_XML="$PWD/../repos/${r}.xml"
-	XML_DEST="$PWD/../../../${r}/BuildControl/."
+	MASTER_XML="$PWD/include/repos.xml"
+	REPO_XML="$PWD/repos/${r}.xml"
+	XML_DEST="$REPO_ROOT/${r}/BuildControl/."
 	
 	if [[ ! -f "$REPO_XML" ]]; then
 		echo "error: Didn't find expected $r repo description file: $REPO_XML"
