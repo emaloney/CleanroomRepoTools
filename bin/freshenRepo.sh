@@ -14,6 +14,7 @@ REPO_LIST=()
 BRANCH=master
 DEFAULT_REPO_ROOT="$PWD/.."
 REPO_ROOT="$DEFAULT_REPO_ROOT"
+REPO_DECL_FILE="$PWD/repos"
 
 while [[ $1 ]]; do
 	case $1 in
@@ -40,6 +41,21 @@ while [[ $1 ]]; do
  		fi
 		;;
 
+	--decl)
+ 		while [[ $2 ]]; do
+ 			case $2 in
+ 			-*)
+ 				break
+ 				;;
+ 				
+ 			*)
+				REPO_DECL_FILE="$2"
+		 		shift
+				;;	
+ 			esac
+ 		done
+		;;
+
  	--all|-a)
 		ALL_REPOS_FLAG=1
 		;;
@@ -61,6 +77,8 @@ while [[ $1 ]]; do
 	esac
 	shift
 done
+
+export REPO_ROOT
 
 if [[ $REPO_FLAG != 1 && $ALL_REPOS_FLAG != 1 ]]; then
 	echo "- Must specify repos to freshen using --repo <repo-list> or --all"
@@ -128,6 +146,9 @@ fi
 if [[ $BRANCH ]]; then
 	COPY_ARGS="--branch $BRANCH $COPY_ARGS"
 fi
+if [[ $REPO_ROOT ]]; then
+	COPY_ARGS="--root $REPO_ROOT $COPY_ARGS"
+fi
 
 processStandardFile()
 {
@@ -159,9 +180,15 @@ processSubpath .
 
 for r in ${REPO_LIST[@]}; do
 	MASTER_XML="$PWD/include/repos.xml"
-	REPO_XML="$PWD/repos/${r}.xml"
+	REPO_DECL_BASE=`basename $REPO_DECL_FILE`
+	if [[ -d "$REPO_DECL_FILE" ]]; then
+		REPO_XML="$REPO_DECL_FILE/${r}.xml"
+	elif [[ $REPO_DECL_BASE != "${r}.xml" ]]; then
+		REPO_XML="$REPO_DECL_FILE/${r}.xml"
+	else
+		REPO_XML="$REPO_DECL_FILE"
+	fi
 	XML_DEST="$REPO_ROOT/${r}/BuildControl/."
-	
 	if [[ ! -f "$REPO_XML" ]]; then
 		echo "error: Didn't find expected $r repo description file: $REPO_XML"
 		continue

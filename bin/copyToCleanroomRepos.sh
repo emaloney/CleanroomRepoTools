@@ -114,6 +114,7 @@ fi
 
 REPO_NAME=`basename "$PWD"`
 cd "$REPO_ROOT"
+export REPO_ROOT
 
 #
 # validate the input
@@ -140,12 +141,14 @@ fi
 #
 # make sure we're being run from the expected place
 #
+pushd "$SCRIPT_DIR/../.." > /dev/null
 expectRepo "$REPO_NAME"
+popd > /dev/null
 
 #
 # ensure all the repos are on the expected branch
 #
-pushd "$SCRIPT_DIR/.." > /dev/null
+pushd ".." > /dev/null
 expectReposOnBranch $BRANCH $REPO_LIST
 popd > /dev/null
 
@@ -166,7 +169,7 @@ for f in ${ARGS[@]}; do
 		CP_ARGS="i"
 	fi
 	
-	SRCDIR="${REPO_NAME}/boilerplate"
+	SRCDIR="${SCRIPT_DIR}/../boilerplate"
 	for r in ${REPO_LIST[@]}; do
 		DESTITEM=$( echo "$ITEM" | sed sq^_q.q )
 		echo "Copying $ITEM to $r/${DIR}${DESTITEM}"

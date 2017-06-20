@@ -8,7 +8,7 @@ source common-include.sh
 
 PLATE_BIN="$SCRIPT_DIR/plate"
 REPO_ROOT="$SCRIPT_DIR/../.."
-REPO_SETTINGS_FILE="$SCRIPT_DIR/../repos/${NEW_REPO_NAME}.xml"
+REPO_DECL_FILE="$SCRIPT_DIR/../repos/${NEW_REPO_NAME}.xml"
 DEFAULT_REPO_ROOT=$( cd "$REPO_ROOT"; echo $PWD )
 POSSIBLE_PLATFORMS=( iOS macOS tvOS watchOS all )
 REAL_PLATFORMS=${POSSIBLE_PLATFORMS[@]:0:${#POSSIBLE_PLATFORMS[@]}-1}
@@ -46,7 +46,7 @@ while [[ $1 ]]; do
  		done
  		;;
 
-	--xml)
+	--decl)
  		while [[ $2 ]]; do
  			case $2 in
  			-*)
@@ -54,7 +54,8 @@ while [[ $1 ]]; do
  				;;
  				
  			*)
-				REPO_SETTINGS_FILE="$2"
+				REPO_DECL_FILE="$2"
+				DECL_ARG="--decl $REPO_DECL_FILE"
 		 		shift
 				;;	
  			esac
@@ -125,6 +126,8 @@ while [[ $1 ]]; do
 	esac
 	shift
 done
+
+export REPO_ROOT
 
 showHelp()
 {
@@ -213,7 +216,7 @@ if [[ -e "$REPO_ROOT/$NEW_REPO_NAME" && $FORCE_MODE != 1 ]]; then
 	exitWithErrorSuggestHelp "Directory already exists: $REPO_ROOT/$NEW_REPO_NAME" "Use --force (or -f) to override"
 fi
 
-if [[ -z "$REPO_OWNER" && ! -r "$REPO_SETTINGS_FILE" ]]; then
+if [[ -z "$REPO_OWNER" && ! -r "$REPO_DECL_FILE" ]]; then
 	exitWithErrorSuggestHelp "The repo's owner must be specified"
 fi
 
@@ -276,8 +279,8 @@ processDirectory()
 				printf "\t${REPO_ROOT}/${DEST_DIR}${DEST_NAME} <- $f\n"
 			CREATOR_USER=`id -un`
 			CREATOR_NAME=`id -F`
-			if [[ -r "$REPO_SETTINGS_FILE" ]]; then
-				$PLATE_BIN -t "$f" -o "${REPO_ROOT}/${DEST_DIR}${DEST_NAME}" -m ../include/repos.xml -d "$REPO_SETTINGS_FILE"
+			if [[ -r "$REPO_DECL_FILE" ]]; then
+				$PLATE_BIN -t "$f" -o "${REPO_ROOT}/${DEST_DIR}${DEST_NAME}" -m ../include/repos.xml -d "$REPO_DECL_FILE"
 			else
 				$PLATE_BIN -t "$f" -o "${REPO_ROOT}/${DEST_DIR}${DEST_NAME}" -m ../include/repos.xml --stdin-data <<MBML_BLOCK
 <MBML>
@@ -315,10 +318,10 @@ processDirectory "framework"
 pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 if [[ ! -d .git ]]; then
 	echo "Creating git repo and performing initial commit"
-	git init
-	git checkout -b "$REPO_BRANCH"
+	git init -q
+	git checkout -qb "$REPO_BRANCH"
 	git add .
-	git commit -F - <<COMMIT_MESSAGE
+	git commit -q -F - <<COMMIT_MESSAGE
 Initial commit of $NEW_REPO_NAME
 
 Automated by $SCRIPT_NAME
@@ -328,17 +331,17 @@ else
 fi
 popd > /dev/null
 
-cd "$SCRIPT_DIR"/..
+cd "$REPO_ROOT"
 expectReposOnBranch "$REPO_BRANCH" "$NEW_REPO_NAME"
 
 echo "Generating boilerplate files"
-./bin/freshenRepo.sh --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT"
+"${SCRIPT_DIR}/freshenRepo.sh" --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT" $DECL_ARG
 
 pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 
 echo "Committing final files to git"
 git add .
-git commit -F - <<COMMIT_MESSAGE
+git commit -q -F - <<COMMIT_MESSAGE
 Commit of $NEW_REPO_NAME
 
 Automated by $SCRIPT_NAME

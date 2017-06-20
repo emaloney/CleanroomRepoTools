@@ -15,6 +15,8 @@ BRANCH=master
 FILE_LIST=()
 REPO_LIST=()
 REPO_ROOT="$PWD/.."
+REPO_DECL_FILE="repos/${r}.xml"
+
 while [[ $1 ]]; do
 	case $1 in
 	--help|-h|-\?)
@@ -60,6 +62,21 @@ while [[ $1 ]]; do
  		done
  		;;
  	
+	--decl)
+ 		while [[ $2 ]]; do
+ 			case $2 in
+ 			-*)
+ 				break
+ 				;;
+ 				
+ 			*)
+				REPO_DECL_FILE="$2"
+		 		shift
+				;;	
+ 			esac
+ 		done
+		;;
+
  	--all|-a)
 		ALL_REPOS_FLAG=1
  		;;
@@ -91,6 +108,8 @@ while [[ $1 ]]; do
 	esac
 	shift
 done
+
+export REPO_ROOT
 
 showHelp()
 {
@@ -220,10 +239,8 @@ for f in ${FILE_LIST[@]}; do
 			FRAMEWORK_VERSION_PUBLIC=`echo $FRAMEWORK_VERSION | sed "sq\.[0-9]*\\$qq"`
 		fi
 		export FRAMEWORK_VERSION_PUBLIC
-		echo $PWD
-		REPO_XML="repos/${r}.xml"
-		if [[ -r "$REPO_XML" ]]; then
-			mkdir -p "$REPO_ROOT/$r/$OUTPUT_BASE" && ./bin/plate -t "$BOILERPLATE_FILE" -d "$REPO_XML" -m include/repos.xml -o "$REPO_ROOT/$r/$OUTPUT_FILE"
+		if [[ -r "$REPO_DECL_FILE" ]]; then
+			mkdir -p "$REPO_ROOT/$r/$OUTPUT_BASE" && ./bin/plate -t "$BOILERPLATE_FILE" -d "$REPO_DECL_FILE" -m include/repos.xml -o "$REPO_ROOT/$r/$OUTPUT_FILE"
 			if [[ "$?" != 0 ]]; then
 				exit 5
 			fi
@@ -232,7 +249,7 @@ for f in ${FILE_LIST[@]}; do
 			fi
 			printf " (done!)\n"
 		else
-			printf "\n        !!! ERROR: Required file $REPO_XML not found\n        !!! Couldn't generate $OUTPUT_FILE for $r\n"
+			printf "\n        !!! ERROR: Required file $REPO_DECL_FILE not found\n        !!! Couldn't generate $OUTPUT_FILE for $r\n"
 		fi
 	done
 done
