@@ -15,6 +15,7 @@ REAL_PLATFORMS=${POSSIBLE_PLATFORMS[@]:0:${#POSSIBLE_PLATFORMS[@]}-1}
 POSSIBLE_PLATFORMS_STR=`echo -n "${POSSIBLE_PLATFORMS[@]}"`
 POSSIBLE_PLATFORMS_PARAM=`echo $POSSIBLE_PLATFORMS_STR | sed 's/ /|/g'`
 REPO_BRANCH=master
+SKELETON_TYPE=framework
 
 #
 # parse the command-line arguments
@@ -61,6 +62,21 @@ while [[ $1 ]]; do
  			esac
  		done
 		;;
+
+	--type|-t)
+		while [[ $2 ]]; do
+ 			case $2 in
+ 			-*)
+ 				break
+ 				;;
+ 				
+ 			*)
+				SKELETON_TYPE="$2"
+		 		shift
+				;;	
+ 			esac
+ 		done
+ 		;;
 	
 	--dest|-d|--root)
  		while [[ $2 ]]; do
@@ -310,8 +326,8 @@ MBML_BLOCK
 }
 
 cd "$SCRIPT_DIR/../skeletons"
-echo "Creating new Xcode framework project repo $NEW_REPO_NAME in $REPO_ROOT"
-processDirectory "framework"
+echo "Creating new Xcode $SKELETON_TYPE project repo $NEW_REPO_NAME in $REPO_ROOT"
+processDirectory "$SKELETON_TYPE"
 
 # we need to create the repo first because the freshenRepo.sh script below
 # requires the git repo to already have been created & have at least 1 commit
@@ -335,7 +351,7 @@ cd "$REPO_ROOT"
 expectReposOnBranch "$REPO_BRANCH" "$NEW_REPO_NAME"
 
 echo "Generating boilerplate files"
-"${SCRIPT_DIR}/freshenRepo.sh" --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT" $DECL_ARG
+"${SCRIPT_DIR}/freshenRepo.sh" --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT" --type "$SKELETON_TYPE" $DECL_ARG
 
 pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 

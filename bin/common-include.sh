@@ -93,7 +93,7 @@ expectReposOnBranch()
 	# make sure all the repos are on the right branch
 	#
 	for r in $@; do
-		REPO_DIR="$r"
+		REPO_DIR="$REPO_ROOT/$r"
 		if [[ ! -d "$REPO_DIR" ]]; then
 			echo "error: Didn't find expected git repo for $r at path $REPO_DIR"
 			exit 3
@@ -112,6 +112,12 @@ isInArray()
 {
 	for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 1; done
 	return 0
+}
+
+stripBoilerplateDirectory()
+{
+	STRIPPED=`echo "$1" | sed -E s#\(boilerplate/common\|boilerplate/$SKELETON_TYPE\)/?##`
+	echo $STRIPPED
 }
 
 CLEANROOM_REPOS=()

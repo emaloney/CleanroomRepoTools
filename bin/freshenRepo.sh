@@ -15,6 +15,7 @@ BRANCH=master
 DEFAULT_REPO_ROOT="$PWD/.."
 REPO_ROOT="$DEFAULT_REPO_ROOT"
 REPO_DECL_FILE="$PWD/repos"
+SKELETON_TYPE=framework
 
 while [[ $1 ]]; do
 	case $1 in
@@ -55,6 +56,21 @@ while [[ $1 ]]; do
  			esac
  		done
 		;;
+
+	--type|-t)
+		while [[ $2 ]]; do
+ 			case $2 in
+ 			-*)
+ 				break
+ 				;;
+ 				
+ 			*)
+				SKELETON_TYPE="$2"
+		 		shift
+				;;	
+ 			esac
+ 		done
+ 		;;
 
  	--all|-a)
 		ALL_REPOS_FLAG=1
@@ -118,8 +134,6 @@ if [[ $ALL_REPOS_FLAG == 1 ]]; then
 	REPO_LIST=${CLEANROOM_REPOS[@]}
 fi
 
-BOILERPLATE_DIR="$SCRIPT_DIR/../boilerplate"
-
 if [[ $FORCE_MODE ]]; then
 	CP_ARGS="f"
 else
@@ -130,8 +144,7 @@ processBoilerplateFile()
 {
 	pushd "$SCRIPT_DIR" > /dev/null
 
-	BASE_FILENAME=`echo "$1" | sed s#.boilerplate##`
-	executeCommand "./boilermaker.sh $BOILERMAKER_ARGS --file \"$BASE_FILENAME\""
+	executeCommand "./boilermaker.sh $BOILERMAKER_ARGS --type $SKELETON_TYPE --file \"$1\""
 
 	popd > /dev/null
 }
@@ -154,29 +167,29 @@ processStandardFile()
 {
 	pushd "$SCRIPT_DIR" > /dev/null
 	
-	executeCommand "./copyToCleanroomRepos.sh \"$1\" $COPY_ARGS"
+	OUTPUT_FILE=`stripBoilerplateDirectory "$1"`
+
+	executeCommand "./copyToCleanroomRepos.sh \"$1\" \"$OUTPUT_FILE\" $COPY_ARGS"
 
 	popd > /dev/null
 }
 
 processSubpath()
 {
-	pushd "$BOILERPLATE_DIR/$1" > /dev/null
-	
-	for f in *; do
+	for f in $1/*; do
 		if [[ -d "$f" ]]; then
-			processSubpath "$1/$f"
+			processSubpath "$f"
 		elif [[ $(echo "$f" | grep -c "\.boilerplate\$") > 0 ]]; then
-			processBoilerplateFile "$1/$f"
+			processBoilerplateFile "$f"
 		else
-			processStandardFile "$1/$f"
+			
+			processStandardFile "$f"
 		fi
 	done
-
-	popd > /dev/null
 }
 
-processSubpath .
+processSubpath boilerplate/common
+processSubpath boilerplate/$SKELETON_TYPE
 
 for r in ${REPO_LIST[@]}; do
 	MASTER_XML="$PWD/include/repos.xml"
@@ -204,4 +217,3 @@ for r in ${REPO_LIST[@]}; do
 	echo "Copying $REPO_XML to $r/BuildControl"
 	executeCommand "cp -${CP_ARGS} \"$REPO_XML\" \"$XML_DEST\""
 done
-

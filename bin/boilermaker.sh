@@ -16,6 +16,7 @@ FILE_LIST=()
 REPO_LIST=()
 REPO_ROOT="$PWD/.."
 REPO_DECL_FILE="repos/${r}.xml"
+SKELETON_TYPE=framework
 
 while [[ $1 ]]; do
 	case $1 in
@@ -76,6 +77,21 @@ while [[ $1 ]]; do
  			esac
  		done
 		;;
+
+	--type|-t)
+		while [[ $2 ]]; do
+ 			case $2 in
+ 			-*)
+ 				break
+ 				;;
+ 				
+ 			*)
+				SKELETON_TYPE="$2"
+		 		shift
+				;;	
+ 			esac
+ 		done
+ 		;;
 
  	--all|-a)
 		ALL_REPOS_FLAG=1
@@ -213,20 +229,19 @@ export BRANCH
 # make sure boilerplate exists for each file specified
 #
 for f in ${FILE_LIST[@]}; do
-	BOILERPLATE_FILE="boilerplate/$f.boilerplate"
-	if [[ ! -f "$BOILERPLATE_FILE" ]]; then
-		echo "error: Expected to find boilerplate file at $BOILERPLATE_FILE (within the directory $PWD)"
+	if [[ ! -f "$f" ]]; then
+		echo "error: Expected to find boilerplate file at $f (within the directory $PWD)"
 		exit 4
 	fi
 done
 
 #
-# process each file for each repo
+# process file for each repo
 #
 for f in ${FILE_LIST[@]}; do
-	BOILERPLATE_FILE="boilerplate/$f.boilerplate"
-	OUTPUT_BASE=`dirname "$f"`
-	OUTPUT_NAME=`basename "$f" | sed s#^_#.#`
+	OUTPUT_BASE=`stripBoilerplateDirectory "$f"`
+	OUTPUT_BASE=`dirname "$OUTPUT_BASE"`
+	OUTPUT_NAME=`basename "$f" | sed s#^_#.# | sed s#\\.boilerplate\\$##`
 	OUTPUT_FILE="$OUTPUT_BASE/$OUTPUT_NAME"
 	echo "Generating $OUTPUT_FILE..."
 	for r in ${REPO_LIST[@]}; do
@@ -240,7 +255,7 @@ for f in ${FILE_LIST[@]}; do
 		fi
 		export FRAMEWORK_VERSION_PUBLIC
 		if [[ -r "$REPO_DECL_FILE" ]]; then
-			mkdir -p "$REPO_ROOT/$r/$OUTPUT_BASE" && ./bin/plate -t "$BOILERPLATE_FILE" -d "$REPO_DECL_FILE" -m include/repos.xml -o "$REPO_ROOT/$r/$OUTPUT_FILE"
+			mkdir -p "$REPO_ROOT/$r/$OUTPUT_BASE" && ./bin/plate -t "$f" -d "$REPO_DECL_FILE" -m include/repos.xml -o "$REPO_ROOT/$r/$OUTPUT_FILE"
 			if [[ "$?" != 0 ]]; then
 				exit 5
 			fi

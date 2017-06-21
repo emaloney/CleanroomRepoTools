@@ -153,30 +153,24 @@ expectReposOnBranch $BRANCH $REPO_LIST
 popd > /dev/null
 
 #
-# ensure that the arguments are all things that can be copied
+# copy the item to each repo
 #
-for f in ${ARGS[@]}; do
-	ITEM=`basename "$f"`
-	DIR=`dirname "$f"`
-	if [[ $DIR == '.' ]]; then
-		DIR=""
-	else
-		DIR="$DIR/"
+SRCITEM="${ARGS[0]}"
+DESTITEM="${ARGS[1]}"
+DESTDIR=`dirname "$DESTITEM"`
+if [[ $FORCE_MODE ]]; then
+	CP_ARGS="f"
+else
+	CP_ARGS="i"
+fi
+
+SRCDIR="${SCRIPT_DIR}/.."
+for r in ${REPO_LIST[@]}; do
+	RENAMED_ITEM=$( echo "$DESTITEM" | sed sq^_q.q )
+	echo "Copying $SRCITEM to $r/${DESTITEM}"
+	mkdir -p "$REPO_ROOT/$r/$DESTDIR"
+	executeCommand "cp -${CP_ARGS}R \"${SRCDIR}/${SRCITEM}\" \"$REPO_ROOT/$r/$DESTITEM\""
+	if [[ "$DESTITEM" != "$RENAMED_ITEM" ]]; then
+		executeCommand "mv -f \"$REPO_ROOT/$r/${DESTITEM}\" \"$REPO_ROOT/$r/${RENAMED_ITEM}\""
 	fi
-	if [[ $FORCE_MODE ]]; then
-		CP_ARGS="f"
-	else
-		CP_ARGS="i"
-	fi
-	
-	SRCDIR="${SCRIPT_DIR}/../boilerplate"
-	for r in ${REPO_LIST[@]}; do
-		DESTITEM=$( echo "$ITEM" | sed sq^_q.q )
-		echo "Copying $ITEM to $r/${DIR}${DESTITEM}"
-		mkdir -p "$r/$DIR"
-		executeCommand "cp -${CP_ARGS}R \"${SRCDIR}/${DIR}${ITEM}\" \"$r/$DIR.\""
-		if [[ "$DESTITEM" != "$ITEM" ]]; then
-			executeCommand "mv -f \"$r/${DIR}${ITEM}\" \"$r/${DIR}${DESTITEM}\""
-		fi
-	done
 done
