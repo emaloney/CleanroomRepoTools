@@ -82,6 +82,10 @@ expectReposOnBranch()
 	# make sure the Cleanroom repo is on a parallel branch
 	#
 	pushd "${SCRIPT_DIR}/.." > /dev/null
+	if [[ `echo $PWD | grep -c "Carthage/Checkouts/CleanroomRepoTools$"` == 1 ]]; then
+		# if we're in a carthage submodule, use the containing repo
+		cd "../../.."
+	fi
 	CLEANROOM_BRANCH=`git rev-parse --abbrev-ref HEAD`
 	popd > /dev/null
 	if [[ $CLEANROOM_BRANCH != $BRANCH ]]; then
