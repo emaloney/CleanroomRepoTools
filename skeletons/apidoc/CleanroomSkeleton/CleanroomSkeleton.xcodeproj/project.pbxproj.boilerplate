@@ -11,7 +11,6 @@
 		3BA3634E1EF9F642005D6232 /* CleanroomConcurrency.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BA3634D1EF9F642005D6232 /* CleanroomConcurrency.framework */; };
 		3BA363501EF9F682005D6232 /* CleanroomDataTransactions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BA3634F1EF9F682005D6232 /* CleanroomDataTransactions.framework */; };
 		3BA363521EF9F704005D6232 /* CleanroomDateTime.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BA363511EF9F704005D6232 /* CleanroomDateTime.framework */; };
-		3BA363541EFA2EF2005D6232 /* ${project:name}.swift in Resources */ = {isa = PBXBuildFile; fileRef = 3BA363531EFA2EF2005D6232 /* ${project:name}.swift */; };
 		3BA363561EFA2F17005D6232 /* ${project:name}UnitTests.swift in Resources */ = {isa = PBXBuildFile; fileRef = 3BA363551EFA2F17005D6232 /* ${project:name}UnitTests.swift */; };
 /* End PBXBuildFile section */
 
@@ -38,7 +37,6 @@
 		3BA3634D1EF9F642005D6232 /* CleanroomConcurrency.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CleanroomConcurrency.framework; path = Carthage/Checkouts/CleanroomConcurrency/build/Debug/CleanroomConcurrency.framework; sourceTree = "<group>"; };
 		3BA3634F1EF9F682005D6232 /* CleanroomDataTransactions.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CleanroomDataTransactions.framework; path = Carthage/Checkouts/CleanroomDataTransactions/build/Debug/CleanroomDataTransactions.framework; sourceTree = "<group>"; };
 		3BA363511EF9F704005D6232 /* CleanroomDateTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CleanroomDateTime.framework; path = Carthage/Checkouts/CleanroomDateTime/build/Debug/CleanroomDateTime.framework; sourceTree = "<group>"; };
-		3BA363531EFA2EF2005D6232 /* ${project:name}.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ${project:name}.swift; sourceTree = "<group>"; };
 		3BA363551EFA2F17005D6232 /* ${project:name}UnitTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ${project:name}UnitTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -109,7 +107,6 @@
 		3B90592F1DAECF7400B4EEC0 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				3BA363531EFA2EF2005D6232 /* ${project:name}.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -226,7 +223,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3BA363541EFA2EF2005D6232 /* ${project:name}.swift in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -369,12 +365,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Checkouts/CleanroomConcurrency/build/Debug",
-					"$(PROJECT_DIR)/Carthage/Checkouts/CleanroomDataTransactions/build/Debug",
-					"$(PROJECT_DIR)/Carthage/Checkouts/CleanroomDateTime/build/Debug",
-				);
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 3.0;
@@ -389,12 +379,6 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Carthage/Checkouts/CleanroomConcurrency/build/Debug",
-					"$(PROJECT_DIR)/Carthage/Checkouts/CleanroomDataTransactions/build/Debug",
-					"$(PROJECT_DIR)/Carthage/Checkouts/CleanroomDateTime/build/Debug",
-				);
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 3.0;
