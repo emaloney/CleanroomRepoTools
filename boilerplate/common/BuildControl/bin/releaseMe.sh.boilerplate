@@ -374,6 +374,7 @@ fi
 #
 FRAMEWORK_PLIST_FILE="Info-Target.plist"
 FRAMEWORK_PLIST_PATH="$$SCRIPT_DIR/../$$FRAMEWORK_PLIST_FILE"
+PLIST_BUDDY=/usr/libexec/PlistBuddy
 CURRENT_VERSION=`$$PLIST_BUDDY "$$FRAMEWORK_PLIST_PATH" -c "Print :CFBundleShortVersionString"`
 validateVersion "$$CURRENT_VERSION" "the CFBundleShortVersionString value in the $$FRAMEWORK_PLIST_FILE file"
 
