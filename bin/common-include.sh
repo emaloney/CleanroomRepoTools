@@ -87,34 +87,34 @@ expectReposOnBranch()
 	# make sure the Cleanroom repo is on a parallel branch
 	#
 	pushd "${SCRIPT_DIR}/.." > /dev/null
-	if [[ `echo $PWD | grep -c "Carthage/Checkouts/CleanroomRepoTools$"` == 1 ]]; then
-		# if we're in a carthage submodule, use the containing repo
-		cd "../../.."
-	fi
-	CLEANROOM_BRANCH=`git rev-parse --abbrev-ref HEAD`
-	popd > /dev/null
-	if [[ $CLEANROOM_BRANCH != $BRANCH ]]; then
-		echo "error: Expected CleanroomRepoTools to be on $BRANCH branch; is on $CLEANROOM_BRANCH instead"
-		exit 2
-	fi
-
-	#
-	# make sure all the repos are on the right branch
-	#
-	for r in $@; do
-		REPO_DIR="$REPO_ROOT/$r"
-		if [[ ! -d "$REPO_DIR" ]]; then
-			echo "error: Didn't find expected git repo for $r at path $REPO_DIR"
-			exit 3
-		fi
-		pushd "$REPO_DIR" > /dev/null
-		CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+	# if we're in a carthage submodule (eg below Carthage/Checkouts/), don't check the
+	# branches since it won't be relevant in that case
+	if [[ `echo $PWD | grep -c "Carthage/Checkouts/CleanroomRepoTools$"` == 0 ]]; then
+		CLEANROOM_BRANCH=`git rev-parse --abbrev-ref HEAD`
 		popd > /dev/null
-		if [[ $CURRENT_BRANCH != $BRANCH ]]; then
-			echo "error: Expected $r to be on the \"$BRANCH\" branch; it is on \"$CURRENT_BRANCH\" instead."
-			exit 4
+		if [[ $CLEANROOM_BRANCH != $BRANCH ]]; then
+			echo "error: Expected CleanroomRepoTools to be on $BRANCH branch; is on $CLEANROOM_BRANCH instead"
+			exit 2
 		fi
-	done
+
+		#
+		# make sure all the repos are on the right branch
+		#
+		for r in $@; do
+			REPO_DIR="$REPO_ROOT/$r"
+			if [[ ! -d "$REPO_DIR" ]]; then
+				echo "error: Didn't find expected git repo for $r at path $REPO_DIR"
+				exit 3
+			fi
+			pushd "$REPO_DIR" > /dev/null
+			CURRENT_BRANCH=`git rev-parse --abbrev-ref HEAD`
+			popd > /dev/null
+			if [[ $CURRENT_BRANCH != $BRANCH ]]; then
+				echo "error: Expected $r to be on the \"$BRANCH\" branch; it is on \"$CURRENT_BRANCH\" instead."
+				exit 4
+			fi
+		done
+	fi
 }
 
 isInArray()
