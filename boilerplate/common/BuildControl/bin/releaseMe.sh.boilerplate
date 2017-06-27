@@ -202,15 +202,19 @@ validateVersion()
 
 updateStatus()
 {
-	echo 
-	echo "$$1"
-	echo
+	if [[ ! $$QUIET ]]; then
+		echo 
+		echo "$$1"
+		echo
+	fi
 }
 
 confirmationPrompt()
 {
-	echo
-	echo $$1
+	if [[ ! $$QUIET || ! $$AUTOMATED_MODE ]]; then
+		echo
+		echo $$1
+	fi
 	if [[ -z $$AUTOMATED_MODE ]]; then
 		echo
 		read -p "Are you sure you want to do this? " -n 1 -r
@@ -233,9 +237,15 @@ executeCommand()
 		echo
 		echo "	set -o pipefail && $$1"
 	else
-		eval "set -o pipefail && $$1"
+		unset _CMD
+		if [[ $$QUIET ]]; then
+			_CMD="set -o pipefail && $$1 > /dev/null"
+		else
+			_CMD="set -o pipefail && $$1"
+		fi
+		eval $$_CMD
 		if [[ $$? != 0 ]]; then
-			exitWithError "Command failed"
+			exitWithError "Command failed: $$_CMD"
 		fi
 	fi
 }
@@ -258,6 +268,8 @@ fi
 #
 # parse the command-line arguments
 #
+AMEND_ARGS=""
+BRANCH=master
 STASH_DIRTY_FILES=0
 COMMIT_DIRTY_FILES=0
 IGNORE_DIRTY_FILES=0
@@ -275,6 +287,10 @@ while [[ $$1 ]]; do
 	
 	--auto|-a)
 		AUTOMATED_MODE=1
+		;;
+		
+	--amend)
+		AMEND_ARGS="--amend --no-edit"
 		;;
 		
 	--stash-dirty-files)
@@ -308,12 +324,35 @@ while [[ $$1 ]]; do
 		PUSH_WHEN_DONE=1
 		;;
 	
+	--branch|-b)
+		if [[ $$2 ]]; then
+			BRANCH="$$2"
+			shift
+		fi
+		;;
+	
+	--commit-message-file|-m)
+		if [[ $$2 ]]; then
+			COMMIT_MESSAGE=`cat "$$2"`
+			shift
+		fi
+		;;
+
 	--skip-docs)
 		SKIP_DOCUMENTATION=1
 		;;
 		
 	--skip-tests)
 		SKIP_TESTS=1
+		;;
+		
+	--quiet|-q)
+		QUIET=1
+		QUIET_ARG="-q"
+		;;
+		
+	--rebase)
+		REBASE=1
 		;;
 		
 	--dry-run)
@@ -442,8 +481,12 @@ fi
 #
 # make sure it builds
 #
-updateStatus "Verifying that $$REPO_NAME builds"
 XCODEBUILD=/usr/bin/xcodebuild
+XCODEBUILD_CMD="$$XCODEBUILD"
+updateStatus "Verifying that $$REPO_NAME builds"
+if [[ $$QUIET ]]; then
+	XCODEBUILD_CMD="$$XCODEBUILD -quiet"
+fi
 if [[ ! -x "$$XCODEBUILD" ]]; then
 	exitWithErrorSuggestHelp "Expected to find xcodebuild at path $$XCODEBUILD"
 fi
@@ -495,7 +538,7 @@ for PLATFORM in $$COMPILE_PLATFORMS; do
 		BUILD_ACTION="clean $$(testActionForPlatform $$PLATFORM)"
 	fi
 	RUN_DESTINATION="$$(runDestinationForPlatform $$PLATFORM)"
-	executeCommand "$$XCODEBUILD $$PROJECT_SPECIFIER -scheme \"$${REPO_NAME}^if($project:usesPlatformSpecificSchemes|-^q($){PLATFORM})\" -configuration Debug -destination \"$$RUN_DESTINATION\" $$BUILD_ACTION $$XCODEBUILD_PIPETO"
+	executeCommand "$$XCODEBUILD_CMD $$PROJECT_SPECIFIER -scheme \"$${REPO_NAME}^if($project:usesPlatformSpecificSchemes|-^q($){PLATFORM})\" -configuration Debug -destination \"$$RUN_DESTINATION\" $$BUILD_ACTION $$XCODEBUILD_PIPETO"
 done
 
 #
@@ -503,11 +546,11 @@ done
 #
 updateStatus "Adjusting version numbers"
 executeCommand "$$PLIST_BUDDY \"$$FRAMEWORK_PLIST_PATH\" -c \"Set :CFBundleShortVersionString $$VERSION\""
-executeCommand "agvtool bump"
+agvtool bump > /dev/null
 
 if [[ ! $$SKIP_DOCUMENTATION ]]; then
 	updateStatus "Rebuilding documentation"
-	executeCommand "$$SCRIPT_DIR/generateDocumentationForAPI.sh"
+	"$$SCRIPT_DIR/generateDocumentationForAPI.sh" $$QUIET_ARG
 	executeCommand "git add Documentation/."
 fi
 
@@ -515,16 +558,26 @@ fi
 # commit changes
 #
 BUILD_NUMBER=`agvtool vers -terse`
-COMMIT_COMMENT="Release $$VERSION (build $$BUILD_NUMBER)"
-if [[ $$REPO_IS_DIRTY && $$COMMIT_DIRTY_FILES > 0 ]]; then
-	COMMIT_COMMENT="$$COMMIT_COMMENT -- committed with other changes"
+if [[ -z $$COMMIT_MESSAGE ]]; then
+	COMMIT_MESSAGE="Release $$VERSION (build $$BUILD_NUMBER)"
+	if [[ $$REPO_IS_DIRTY && $$COMMIT_DIRTY_FILES > 0 ]]; then
+		COMMIT_MESSAGE="$$COMMIT_MESSAGE -- committed with other changes"
+	fi
 fi
 if [[ -z $$NO_COMMIT ]]; then
 	updateStatus "Committing changes"
-	executeCommand "git commit -a -m '$$COMMIT_COMMENT'"
+	printf "%s" "$$COMMIT_MESSAGE" | git commit -a $$QUIET_ARG $$AMEND_ARGS -F -
 else
 	updateStatus "! Not committing changes; --no-commit or --ignore-dirty-files was specified"
-	printf "> To commit manually, use:^q(\n\n)    git commit -a -m '$$COMMIT_COMMENT'^q(\n)"
+	printf "> To commit manually, use:^q(\n\n)    git commit -a -m '$$COMMIT_MESSAGE'^q(\n)"
+fi
+
+#
+# rebase with existing changes if needed
+#
+if [[ $$REBASE ]]; then
+	updateStatus "Rebasing with existing $$BRANCH branch"
+	executeCommand "git pull origin $$BRANCH $$QUIET_ARG --rebase --allow-unrelated-histories --strategy=recursive -Xtheirs"
 fi
 
 #
@@ -543,9 +596,9 @@ fi
 #
 if [[ $$PUSH_WHEN_DONE && -z $$NO_COMMIT ]]; then
 	updateStatus "Pushing changes to origin"
-	executeCommand "git push"
+	executeCommand "git push $$QUIET_ARG"
 	if [[ $$TAG_WHEN_DONE && !$$NO_TAG ]]; then
-		executeCommand "git push --tags"
+		executeCommand "git push --tags $$QUIET_ARG"
 	fi
 else
 	printf "^q(\n)> REMEMBER: The release isn't done until you push the changes! Don't forget to:^q(\n\n)    git push && git push --tags^q(\n)"
