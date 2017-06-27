@@ -32,6 +32,13 @@ while [[ $1 ]]; do
 		FORCE_MODE=1
 		;;
 	
+	--commit-message-file|-m)
+		if [[ $2 ]]; then
+			COMMIT_MESSAGE=`cat "$2"`
+			shift
+		fi
+		;;
+		
 	--branch|-b)
 		while [[ $2 ]]; do
  			case $2 in
@@ -329,25 +336,29 @@ cd "$SCRIPT_DIR/../skeletons"
 echo "Creating new Xcode $SKELETON_TYPE project repo $NEW_REPO_NAME in $REPO_ROOT"
 processDirectory "$SKELETON_TYPE"
 
-# we need to create the repo first because the freshenRepo.sh script below
-# requires the git repo to already have been created & have at least 1 commit
-pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
-if [[ ! -d .git ]]; then
+cd "$REPO_ROOT"
+
+USE_GIT=0
+if [[ ! -d "$NEW_REPO_NAME/.git" ]]; then
+	# we need to create the repo first because the freshenRepo.sh script below
+	# requires the git repo to already have been created & have at least 1 commit
+	pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
+	if [[ -z $COMMIT_MESSAGE ]]; then
+		define COMMIT_MESSAGE <<__COMMIT_MESSAGE__
+Initial commit of $NEW_REPO_NAME
+
+Automated by $SCRIPT_NAME
+__COMMIT_MESSAGE__
+	fi
+	USE_GIT=1
 	echo "Creating git repo and performing initial commit"
 	git init -q
 	git checkout -qb "$REPO_BRANCH"
 	git add .
-	git commit -q -F - <<COMMIT_MESSAGE
-Initial commit of $NEW_REPO_NAME
-
-Automated by $SCRIPT_NAME
-COMMIT_MESSAGE
-else
-	echo "It looks like $PWD is already under git control"
+	printf "%s" "$COMMIT_MESSAGE" | git commit -q -F -
+	popd > /dev/null
 fi
-popd > /dev/null
 
-cd "$REPO_ROOT"
 expectReposOnBranch "$REPO_BRANCH" "$NEW_REPO_NAME"
 
 echo "Generating boilerplate files"
@@ -355,13 +366,10 @@ echo "Generating boilerplate files"
 
 pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 
-echo "Committing final files to git"
-git add .
-git commit -q -F - <<COMMIT_MESSAGE
-Commit of $NEW_REPO_NAME
-
-Automated by $SCRIPT_NAME
-COMMIT_MESSAGE
-
-popd > /dev/null
-echo "Done!"
+if [[ $USE_GIT ]]; then
+	echo "Committing final files to git"
+	git add .
+	git commit -q --amend --no-edit
+	popd > /dev/null
+	echo "Done!"
+fi
