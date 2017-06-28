@@ -209,6 +209,13 @@ updateStatus()
 	fi
 }
 
+summarize()
+{
+	if [[ $$SUMMARIZE ]]; then
+		printf "\t...%s\n" "$$1"
+	fi
+}
+
 confirmationPrompt()
 {
 	if [[ ! $$QUIET || ! $$AUTOMATED_MODE ]]; then
@@ -350,7 +357,13 @@ while [[ $$1 ]]; do
 		QUIET=1
 		QUIET_ARG="-q"
 		;;
-		
+	
+	--summarize|-z)
+		SUMMARIZE=1
+		QUIET=1
+		QUIET_ARG="-q"
+		;;
+	
 	--rebase)
 		REBASE=1
 		;;
@@ -532,13 +545,18 @@ runDestinationForPlatform()
 #
 for PLATFORM in $$COMPILE_PLATFORMS; do
 	updateStatus "Building: $$PROJECT_NAME for $$PLATFORM..."
+	summarize "building $$PROJECT_NAME for $$PLATFORM"
 	if [[ $$SKIP_TESTS ]]; then
 		BUILD_ACTION="clean build"
 	else
 		BUILD_ACTION="clean $$(testActionForPlatform $$PLATFORM)"
 	fi
 	RUN_DESTINATION="$$(runDestinationForPlatform $$PLATFORM)"
-	executeCommand "$$XCODEBUILD_CMD $$PROJECT_SPECIFIER -scheme \"$${REPO_NAME}^if($project:usesPlatformSpecificSchemes|-^q($){PLATFORM})\" -configuration Debug -destination \"$$RUN_DESTINATION\" $$BUILD_ACTION $$XCODEBUILD_PIPETO"
+	if [[ $$QUIET ]]; then
+		executeCommand "$$XCODEBUILD_CMD $$PROJECT_SPECIFIER -scheme \"$${REPO_NAME}^if($project:usesPlatformSpecificSchemes|-^q($){PLATFORM})\" -configuration Debug -destination \"$$RUN_DESTINATION\" $$BUILD_ACTION $$XCODEBUILD_PIPETO" 2&> /dev/null
+	else
+		executeCommand "$$XCODEBUILD_CMD $$PROJECT_SPECIFIER -scheme \"$${REPO_NAME}^if($project:usesPlatformSpecificSchemes|-^q($){PLATFORM})\" -configuration Debug -destination \"$$RUN_DESTINATION\" $$BUILD_ACTION $$XCODEBUILD_PIPETO"
+	fi
 done
 
 #
@@ -547,9 +565,11 @@ done
 updateStatus "Adjusting version numbers"
 executeCommand "$$PLIST_BUDDY \"$$FRAMEWORK_PLIST_PATH\" -c \"Set :CFBundleShortVersionString $$VERSION\""
 agvtool bump > /dev/null
+summarize "bumped version to $$VERSION from $$CURRENT_VERSION for $$RELEASE_TYPE release"
 
 if [[ ! $$SKIP_DOCUMENTATION ]]; then
 	updateStatus "Rebuilding documentation"
+	summarize "building documentation"
 	"$$SCRIPT_DIR/generateDocumentationForAPI.sh" $$QUIET_ARG
 	executeCommand "git add Documentation/."
 fi
@@ -563,10 +583,13 @@ if [[ -z $$COMMIT_MESSAGE ]]; then
 	if [[ $$REPO_IS_DIRTY && $$COMMIT_DIRTY_FILES > 0 ]]; then
 		COMMIT_MESSAGE="$$COMMIT_MESSAGE -- committed with other changes"
 	fi
+else
+	COMMIT_MESSAGE="[$$VERSION] $$COMMIT_MESSAGE"
 fi
 if [[ -z $$NO_COMMIT ]]; then
 	updateStatus "Committing changes"
 	printf "%s" "$$COMMIT_MESSAGE" | git commit -a $$QUIET_ARG $$AMEND_ARGS -F -
+	summarize "committed changes to $$BRANCH branch"
 else
 	updateStatus "! Not committing changes; --no-commit or --ignore-dirty-files was specified"
 	printf "> To commit manually, use:^q(\n\n)    git commit -a -m '$$COMMIT_MESSAGE'^q(\n)"
@@ -578,6 +601,7 @@ fi
 if [[ $$REBASE ]]; then
 	updateStatus "Rebasing with existing $$BRANCH branch"
 	executeCommand "git pull origin $$BRANCH $$QUIET_ARG --rebase --allow-unrelated-histories --strategy=recursive -Xtheirs"
+	summarize "rebased $$BRANCH branch"
 fi
 
 #
@@ -586,6 +610,7 @@ fi
 if [[ $$TAG_WHEN_DONE && -z $$NO_COMMIT && -z $$NO_TAG ]]; then
 	updateStatus "Tagging repo for $$VERSION release"
 	executeCommand "git tag -a $$VERSION -m 'Release $$VERSION issued by $$SCRIPT_NAME'"
+	summarize "tagged $$BRANCH branch with $$VERSION"
 else
 	updateStatus "! Not tagging repo; --tag was not specified"
 	printf "> To tag manually, use:^q(\n\n)    git tag -a $$VERSION -m 'Release $$VERSION issued by $$SCRIPT_NAME'^q(\n)"
@@ -595,11 +620,13 @@ fi
 # push if we should
 #
 if [[ $$PUSH_WHEN_DONE && -z $$NO_COMMIT ]]; then
-	updateStatus "Pushing changes to origin"
+	ORIGIN_URL=`git remote get-url --push origin`
+	updateStatus "Pushing changes to $$BRANCH branch of $$ORIGIN_URL"
 	executeCommand "git push $$QUIET_ARG"
 	if [[ $$TAG_WHEN_DONE && !$$NO_TAG ]]; then
 		executeCommand "git push --tags $$QUIET_ARG"
 	fi
+	summarize "pushed changes to $$BRANCH branch of $$ORIGIN_URL"
 else
 	printf "^q(\n)> REMEMBER: The release isn't done until you push the changes! Don't forget to:^q(\n\n)    git push && git push --tags^q(\n)"
 fi
