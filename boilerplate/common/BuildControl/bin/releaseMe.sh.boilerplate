@@ -13,162 +13,163 @@ SCRIPT_DIR=$$(cd "$$PWD" ; cd `dirname "$$0"` ; echo "$$PWD")
 
 showHelp()
 {
-	echo "$$SCRIPT_NAME"
-	echo
-	printf "^q(\t)Generates a new release of the project contained in this git^q(\n)"
-	printf "^q(\t)repository.^q(\n)"
-	echo
-	echo "Usage:"
-	echo
-	printf "^q(\t)$$SCRIPT_NAME <release-type>^q(\n)"
-	echo
-	echo "Where:"
-	echo
-	printf "^q(\t)<release-type> is 'major', 'minor' or 'patch', depending on which^q(\n)"
-	printf "^q(\t\t)portion of the version number should be incremented for this^q(\n)"
-	printf "^q(\t\t)release.^q(\n)"
-	echo
-	printf "^q(\t)This script also accepts these optional command-line arguments:^q(\n)"
-	echo
-	printf "^q(\t\t)--set-version <version>^q(\n)"
-	printf "^q(\t\t\t)Make <version> the version number being released^q(\n)"
-	echo
-	printf "^q(\t\t)--auto^q(\n)"
-	printf "^q(\t\t\t)Run automatically without awaiting user confirmation^q(\n)"
-	echo
-	printf "^q(\t\t)--tag^q(\n)"
-	printf "^q(\t\t\t)Tags the repo with the version number upon success^q(\n)"
-	echo
-	printf "^q(\t\t)--push^q(\n)"
-	printf "^q(\t\t\t)Push all changes upon success^q(\n)"
-	echo
-	printf "^q(\t\t)--no-commit^q(\n)"
-	printf "^q(\t\t\t)Skips committing any changes; implies --no-tag^q(\n)"
-	echo
-	printf "^q(\t\t)--no-tag^q(\n)"
-	printf "^q(\t\t\t)Overrides --tag if specified; --no-tag is the default^q(\n)"
-	echo
-	printf "^q(\t\t)--stash-dirty-files^q(\n)"
-	printf "^q(\t\t\t)Stashes dirty files before attempting to release^q(\n)"
-	echo
-	printf "^q(\t\t)--commit-dirty-files^q(\n)"
-	printf "^q(\t\t\t)Commits dirty files before attempting to release^q(\n)"
-	echo
-	printf "^q(\t\t)--ignore-dirty-files^q(\n)"
-	printf "^q(\t\t\t)Ignores dirty files; implies --no-commit --no-tag^q(\n)"
-	echo
-	printf "^q(\t\t)--skip-docs^q(\n)"
-	printf "^q(\t\t\t)Skips generating the documentation^q(\n)"
-	echo
-	printf "^q(\t\t)--skip-tests^q(\n)"
-	printf "^q(\t\t\t)Skips running the unit tests :-(^q(\n)"
-	echo
-	printf "^q(\t\t)--dry-run^q(\n)"
-	printf "^q(\t\t\t)Show commands to be executed instead of executing them^q(\n)"
-	echo
-	printf "^q(\t)Further detail about these options can be found below.^q(\n)"
-	echo
-	echo "How it works"
-	echo
-	printf "^q(\t)By default, the script inspects the appropriate property list file(s)^q(\n)"
-	printf "^q(\t)to determine the current version of the project. The script then^q(\n)"
-	printf "^q(\t)increments the version number according to the release type^q(\n)"
-	printf "^q(\t)specified:^q(\n)"
-	echo
-	printf "^q(\t)major — When the major release type is specified, the major version^q(\n)"
-	printf "^q(\t\t)component is incremented, and both the minor and patch^q(\n)"
-	printf "^q(\t\t)components are reset to zero. 2.1.3 becomes 3.0.0.^q(\n)"
-	echo
-	printf "^q(\t)minor — When the minor release type is specified, the major version^q(\n)"
-	printf "^q(\t\t)component is not changed, while the minor component is^q(\n)"
-	printf "^q(\t\t)incremented and patch component is reset to zero.^q(\n)"
-	printf "^q(\t\t)2.1.3 becomes 2.2.0.^q(\n)"
-	echo
-	printf "^q(\t)patch — When the patch release type is specified, the major and minor^q(\n)"
-	printf "^q(\t\t)version components remain unchanged, while the patch component^q(\n)"
-	printf "^q(\t\t)is incremented. 2.1.3 becomes 2.1.4.^q(\n)"
-	echo
-	printf "^q(\t)The script then updates all necessary references to the version^q(\n)"	
-	printf "^q(\t)elsewhere in the project.^q(\n)"
-	echo
-	printf "^q(\t)Then, the API documentation is rebuilt, and the repository is tagged^q(\n)"
-	printf "^q(\t)with the appropriate version number for the release.^q(\n)"
-	echo
-	printf "^q(\t)Finally, if the --push argument was supplied, the entire release is^q(\n)"	
-	printf "^q(\t)pushed to the repo's origin remote.^q(\n)"	
-	echo
-	echo "Specifying the version explicitly"
-	echo
-	printf "^q(\t)The --set-version argument can be supplied along with a version number^q(\n)"
-	printf "^q(\t)if you wish to specify the exact version number to use.^q(\n)"
-	echo
-	printf "^q(\t)The version number is expected to contain exactly three integer^q(\n)"
-	printf "^q(\t)components separated by periods; trailing zeros are used if^q(\n)"
-	printf "^q(\t)necessary.^q(\n)"
-	echo
-	printf "^q(\t)If you wanted to set a release version of 4.2.1, for example, you^q(\n)"
-	printf "^q(\t)could call the script as follows:^q(\n)"
-	echo
-	printf "^q(\t\t)$$SCRIPT_NAME --set-version 4.2.1^q(\n)"
-	echo
-	printf "^q(\t)NOTE: When the --set-version argument is supplied, the release-type^q(\n)"
-	printf "^q(\t)      argument does not need to be specified (and it will be ignored^q(\n)"
-	printf "^q(\t)      if it is).^q(\n)"
-	echo
-	echo "User Confirmation"
-	echo
-	printf "^q(\t)By default, this script requires user confirmation before making^q(\n)"
-	printf "^q(\t)any changes.^q(\n)"
-	echo
-	printf "^q(\t)To allow this script to be invoked by other scripts, an automated^q(\n)"
-	printf "^q(\t)mode is also supported.^q(\n)"
-	echo
-	printf "^q(\t)When this script is run in automated mode, the user will not be^q(\n)"
-	printf "^q(\t)asked to confirm any actions; all actions are performed immediately.^q(\n)"
-	echo
-	printf "^q(\t)To enable automated mode, supply the --auto argument.^q(\n)"
-	echo
-	echo "Releasing with uncommitted changes"
-	echo
-	printf "^q(\t)Normally, this script will refuse to continue if the repository^q(\n)"
-	printf "^q(\t)is dirty; that is, if there are any modified files that haven't^q(\n)"
-	printf "^q(\t)yet been committed.^q(\n)"
-	echo
-	printf "^q(\t)However, you can force a release to be issued from a dirty repo^q(\n)"
-	printf "^q(\t)using either the --stash-dirty-files or the --commit-dirty-files^q(\n)"
-	printf "^q(\t)argument.^q(\n)"
-	echo
-	printf "^q(\t)The --stash-dirty-files option causes a git stash operation to^q(\n)"
-	printf "^q(\t)occur at the start of the release process, and a stash pop at the^q(\n)"
-	printf "^q(\t)end. This safely moves the dirty files out of the way when the^q(\n)"
-	printf "^q(\t)script it doing its thing, and restores them when it is done.^q(\n)"
-	echo	
-	printf "^q(\t)The --commit-dirty-files option causes the dirty files to be^q(\n)"
-	printf "^q(\t)committed along with the other changes that occur during the^q(\n)"
-	printf "^q(\t)release process.^q(\n)"
-	echo	
-	printf "^q(\t)In addition, an --ignore-dirty-files option is available, which^q(\n)"
-	printf "^q(\t)lets you go through the entire release process, but stops short^q(\n)"
-	printf "^q(\t)of committing and tagging. This allows you to run through the^q(\n)"
-	printf "^q(\t)entire release process without committing you to committing.^q(\n)"
-	echo
-	printf "^q(\t)Note that these options are mutually exclusive and may not be^q(\n)"
-	printf "^q(\t)used with each other.^q(\n)"
-	echo
-	echo "Dry run mode"
-	echo
-	printf "^q(\t)Using the --dry-run argument prevents the release from occurring^q(\n)"
-	printf "^q(\t)and instead shows what would occur if the release were to be^q(\n)"
-	printf "^q(\t)executed using the supplied command-line arguments.^q(\n)"
-	echo
-	echo "Help"
-	echo
-	printf "^q(\t)This documentation is displayed when supplying the --help (or^q(\n)"
-	printf "^q(\t)-h or -?) argument.^q(\n)"
-	echo
-	printf "^q(\t)Note that when this script displays help documentation, all other^q(\n)"
-	printf "^q(\t)command line arguments are ignored and no other actions are performed.^q(\n)"
-	echo
+	define HELP <<HELP
+$$SCRIPT_NAME
+
+	Issues a new release of the project contained in this git repository.
+	
+Usage:
+
+	$$SCRIPT_NAME <release-type> [OPTIONS]
+	
+Where:
+
+	<release-type> is 'major', 'minor' or 'patch', depending on which portion of the 
+		version number should be incremented for this release.
+
+OPTIONS may include:
+
+		--set-version <version>
+			Make <version> the version number being released
+
+		--auto
+			Run automatically without awaiting user confirmation
+
+		--tag
+			Tags the repo with the version number upon success
+
+		--push
+			Push all changes upon success
+
+		--no-commit
+			Skips committing any changes; implies --no-tag
+
+		--no-tag
+			Overrides --tag if specified; --no-tag is the default
+
+		--stash-dirty-files
+			Stashes dirty files before attempting to release
+
+		--commit-dirty-files
+			Commits dirty files before attempting to release
+
+		--ignore-dirty-files
+			Ignores dirty files; implies --no-commit --no-tag
+
+		--skip-docs
+			Skips generating the documentation
+
+		--skip-tests
+			Skips running the unit tests :-(
+
+		--dry-run
+			Show commands to be executed instead of executing them
+
+	Further detail about these options can be found below.
+
+How it works
+
+	By default, the script inspects the appropriate property list file(s)
+	to determine the current version of the project. The script then
+	increments the version number according to the release type
+	specified:
+
+	major — When the major release type is specified, the major version
+		component is incremented, and both the minor and patch
+		components are reset to zero. 2.1.3 becomes 3.0.0.
+
+	minor — When the minor release type is specified, the major version
+		component is not changed, while the minor component is
+		incremented and patch component is reset to zero.
+		2.1.3 becomes 2.2.0.
+
+	patch — When the patch release type is specified, the major and minor
+		version components remain unchanged, while the patch component
+		is incremented. 2.1.3 becomes 2.1.4.
+
+	The script then updates all necessary references to the version	
+	elsewhere in the project.
+
+	Then, the API documentation is rebuilt, and the repository is tagged
+	with the appropriate version number for the release.
+
+	Finally, if the --push argument was supplied, the entire release is	
+	pushed to the repo's origin remote.	
+
+Specifying the version explicitly
+
+	The --set-version argument can be supplied along with a version number
+	if you wish to specify the exact version number to use.
+
+	The version number is expected to contain exactly three integer
+	components separated by periods; trailing zeros are used if
+	necessary.
+
+	If you wanted to set a release version of 4.2.1, for example, you
+	could call the script as follows:
+
+		$$SCRIPT_NAME --set-version 4.2.1
+
+	NOTE: When the --set-version argument is supplied, the release-type
+	      argument does not need to be specified (and it will be ignored
+	      if it is).
+
+User Confirmation
+
+	By default, this script requires user confirmation before making
+	any changes.
+
+	To allow this script to be invoked by other scripts, an automated
+	mode is also supported.
+
+	When this script is run in automated mode, the user will not be
+	asked to confirm any actions; all actions are performed immediately.
+
+	To enable automated mode, supply the --auto argument.
+
+Releasing with uncommitted changes
+
+	Normally, this script will refuse to continue if the repository
+	is dirty; that is, if there are any modified files that haven't
+	yet been committed.
+
+	However, you can force a release to be issued from a dirty repo
+	using either the --stash-dirty-files or the --commit-dirty-files
+	argument.
+
+	The --stash-dirty-files option causes a git stash operation to
+	occur at the start of the release process, and a stash pop at the
+	end. This safely moves the dirty files out of the way when the
+	script it doing its thing, and restores them when it is done.
+
+	The --commit-dirty-files option causes the dirty files to be
+	committed along with the other changes that occur during the
+	release process.
+
+	In addition, an --ignore-dirty-files option is available, which
+	lets you go through the entire release process, but stops short
+	of committing and tagging. This allows you to run through the
+	entire release process without committing you to committing.
+
+	Note that these options are mutually exclusive and may not be
+	used with each other.
+
+Dry run mode
+
+	Using the --dry-run argument prevents the release from occurring
+	and instead shows what would occur if the release were to be
+	executed using the supplied command-line arguments.
+
+Help
+
+	This documentation is displayed when supplying the --help (or
+	-h or -?) argument.
+
+	Note that when this script displays help documentation, all other
+	command line arguments are ignored and no other actions are performed.
+
+HELP
+	printf "$HELP"
 }
 
 printError()
@@ -589,7 +590,7 @@ fi
 if [[ -z $$NO_COMMIT ]]; then
 	updateStatus "Committing changes"
 	printf "%s" "$$COMMIT_MESSAGE" | git commit -a $$QUIET_ARG $$AMEND_ARGS -F -
-	summarize "committed changes to $$BRANCH branch"
+	summarize "committed changes to \"$$BRANCH\" branch"
 else
 	updateStatus "! Not committing changes; --no-commit or --ignore-dirty-files was specified"
 	printf "> To commit manually, use:^q(\n\n)    git commit -a -m '$$COMMIT_MESSAGE'^q(\n)"
@@ -601,7 +602,7 @@ fi
 if [[ $$REBASE ]]; then
 	updateStatus "Rebasing with existing $$BRANCH branch"
 	executeCommand "git pull origin $$BRANCH $$QUIET_ARG --rebase --allow-unrelated-histories --strategy=recursive -Xtheirs"
-	summarize "rebased $$BRANCH branch"
+	summarize "rebased \"$$BRANCH\" branch"
 fi
 
 #
@@ -610,7 +611,7 @@ fi
 if [[ $$TAG_WHEN_DONE && -z $$NO_COMMIT && -z $$NO_TAG ]]; then
 	updateStatus "Tagging repo for $$VERSION release"
 	executeCommand "git tag -a $$VERSION -m 'Release $$VERSION issued by $$SCRIPT_NAME'"
-	summarize "tagged $$BRANCH branch with $$VERSION"
+	summarize "tagged \"$$BRANCH\" branch with $$VERSION"
 else
 	updateStatus "! Not tagging repo; --tag was not specified"
 	printf "> To tag manually, use:^q(\n\n)    git tag -a $$VERSION -m 'Release $$VERSION issued by $$SCRIPT_NAME'^q(\n)"
@@ -621,12 +622,12 @@ fi
 #
 if [[ $$PUSH_WHEN_DONE && -z $$NO_COMMIT ]]; then
 	ORIGIN_URL=`git remote get-url --push origin`
-	updateStatus "Pushing changes to $$BRANCH branch of $$ORIGIN_URL"
+	updateStatus "Pushing changes to \"$$BRANCH\" branch of $$ORIGIN_URL"
 	executeCommand "git push $$QUIET_ARG"
 	if [[ $$TAG_WHEN_DONE && !$$NO_TAG ]]; then
 		executeCommand "git push --tags $$QUIET_ARG"
 	fi
-	summarize "pushed changes to $$BRANCH branch of $$ORIGIN_URL"
+	summarize "pushed changes to \"$$BRANCH\" branch of $$ORIGIN_URL"
 else
 	printf "^q(\n)> REMEMBER: The release isn't done until you push the changes! Don't forget to:^q(\n\n)    git push && git push --tags^q(\n)"
 fi

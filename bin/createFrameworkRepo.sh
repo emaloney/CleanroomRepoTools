@@ -154,69 +154,72 @@ export REPO_ROOT
 
 showHelp()
 {
-	echo "$SCRIPT_NAME"
-	echo
-	printf "\tCreates a skeleton Xcode project structure with standard build settings\n" 
-	printf "\tideal for creating a Swift dynamic framework.\n"
-	echo
-	printf "\tWith this script, you can be up and running building cross-platform\n"
-	printf "\tSwift dynamic frameworks in no time. Just write your code and go.\n"
-	echo
-	printf "\tThe script creates a new directory <project-name> inside the\n"
-	printf "\t<destination-dir> and populates it with an Xcode project file\n"
-	printf "\tcontaining one or more framework build targets (one for each\n"
-	printf "\tplatform to be supported) and stub code.\n"
-	echo
-	printf "\tOnce the project directory has been created, it will then be\n"
-	printf "\tinitialized as a git repo.\n"
-	echo
-	echo "Usage:"
-	echo
-	printf "\t$SCRIPT_NAME <project-name> (--owner|-o) <github-user-id>\n"
-	echo
-	echo "Where:"
-	echo
-	printf "\t<project-name> is the name of the project to create.\n"
-	echo
-	echo "Required arguments:"
-	echo
-	printf "\t<github-user-id> is the GitHub user ID of the repo's owner.\n"
-	echo
-	echo "Optional arguments:"
-	echo
-	printf "\t--dest <destination-dir>\n"
-	echo
-	printf "\t\tThe --dest (or -d) argument accepts a filesystem path\n"
-	printf "\t\tspecifying the directory in which the project repo will\n"
-	printf "\t\tbe created.\n"
-	echo
-	printf "\t\tIf this argument is not provided, newly-created repos will\n"
-	printf "\t\tbe placed within:\n"
-	echo
-	printf "\t\t\t${DEFAULT_REPO_ROOT}\n"
-	echo
-	printf "\t--platform ($POSSIBLE_PLATFORMS_PARAM)\n"
-	echo
-	printf "\t\tThe --platform (or -p) argument accepts a platform specifier\n"
-	printf "\t\tthat governs which platform(s) will be supported by the project\n"
-	printf "\t\tfile to be created. The value 'all' specifies all supported\n"
-	printf "\t\tplatforms. If no value for the --platform argument is provided,\n"
-	printf "\t\t'all' is assumed; let's be cross-platform by default!\n"
-	echo
-	printf "\t--force\n"
-	echo
-	printf "\t\tBy default, the script won't run if the destination directory\n"
-	printf "\t\talready contains a file named <project-name>. Using --force (or\n"
-	printf "\t\t-f) overrides this check, allowing the script to proceed.\n"
-	echo
-	echo "Help"
-	echo
-	printf "\tThis documentation is displayed when supplying the --help (or\n"
-	printf "\t-h or -?) argument.\n"
-	echo
-	printf "\tNote that when this script displays help documentation, all other\n"
-	printf "\tcommand line arguments are ignored and no other actions are performed.\n"
-	echo
+	define HELP <<HELP
+$SCRIPT_NAME
+
+	Creates a skeleton Xcode project structure with standard build settings 
+	ideal for creating a Swift dynamic framework.
+
+	With this script, you can be up and running building cross-platform
+	Swift dynamic frameworks in no time. Just write your code and go.
+
+	The script creates a new directory <project-name> inside the
+	<destination-dir> and populates it with an Xcode project file
+	containing one or more framework build targets (one for each
+	platform to be supported) and stub code.
+
+	Once the project directory has been created, it will then be
+	initialized as a git repo.
+
+Usage:
+
+	$SCRIPT_NAME <project-name> (--owner|-o) <github-user-id>
+
+Where:
+
+	<project-name> is the name of the project to create.
+
+Required arguments:
+
+	<github-user-id> is the GitHub user ID of the repo's owner.
+
+Optional arguments:
+
+	--dest <destination-dir>
+
+		The --dest (or -d) argument accepts a filesystem path
+		specifying the directory in which the project repo will
+		be created.
+
+		If this argument is not provided, newly-created repos will
+		be placed within:
+
+			${DEFAULT_REPO_ROOT}
+
+	--platform ($POSSIBLE_PLATFORMS_PARAM)
+
+		The --platform (or -p) argument accepts a platform specifier
+		that governs which platform(s) will be supported by the project
+		file to be created. The value 'all' specifies all supported
+		platforms. If no value for the --platform argument is provided,
+		'all' is assumed; let's be cross-platform by default!
+
+	--force
+
+		By default, the script won't run if the destination directory
+		already contains a file named <project-name>. Using --force (or
+		-f) overrides this check, allowing the script to proceed.
+
+Help
+
+	This documentation is displayed when supplying the --help (or
+	-h or -?) argument.
+
+	Note that when this script displays help documentation, all other
+	command line arguments are ignored and no other actions are performed.
+
+HELP
+	printf "$HELP"
 }
 
 if [[ $SHOW_HELP ]]; then

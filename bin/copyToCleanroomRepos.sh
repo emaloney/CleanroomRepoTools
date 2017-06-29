@@ -8,40 +8,45 @@ source bin/common-include.sh
 
 showHelp()
 {
-	echo "$SCRIPT_NAME"
-	echo
-	printf "\tCopies one or more portions of the Cleanroom master repo\n"
-	printf "\tinto one or more parallel Cleanroom Project code repos.\n"
-	echo
-	echo "Usage:"
-	echo
-	printf "\t$SCRIPT_NAME <relative-path> [<relative-path> [...]]\n"
-	echo
-	echo "Where:"
-	echo
-	printf "\t<relative-path> is the relative path of a file or directory\n"
-	printf "\twithin the instance of the Cleanroom master repository at:\n"
-	echo
-	printf "\t\t$REPO_ROOT_DEFAULT\n"
-	echo
-	printf "\tEach <relative-path> is recursively copied to the appropriate\n"
-	printf "\tlocation in the individual Cleanroom Project repos that exist\n"
-	printf "\twithin:"
-	echo
-	printf "\t\t$REPO_ROOT_DEFAULT\n"
-	echo
-	printf "\tThe following Cleanroom Project repos have been detected:\n"
-	echo
-	printf "\t\t%s\n" ${CLEANROOM_REPOS[@]}
-	echo
-	echo "Help"
-	echo
-	printf "\tThis documentation is displayed when supplying the --help (or\n"
-	printf "\t-h or -?) argument.\n"
-	echo
-	printf "\tNote that when this script displays help documentation, all other\n"
-	printf "\tcommand line arguments are ignored and no other actions are performed.\n"
-	echo
+	CLEANROOM_REPO_LIST=`printf "\t\t%s\n" ${CLEANROOM_REPOS[@]}`
+
+	define HELP <<HELP
+$SCRIPT_NAME
+
+	Copies one or more portions of the Cleanroom master repo
+	into one or more parallel Cleanroom Project code repos.
+
+Usage:
+
+	$SCRIPT_NAME <relative-path> [<relative-path> [...]]
+
+Where:
+
+	<relative-path> is the relative path of a file or directory
+	within the instance of the Cleanroom master repository at:
+
+		$REPO_ROOT_DEFAULT
+
+	Each <relative-path> is recursively copied to the appropriate
+	location in the individual Cleanroom Project repos that exist
+	within:
+
+		$REPO_ROOT_DEFAULT
+
+	The following Cleanroom Project repos have been detected:
+
+$CLEANROOM_REPO_LIST
+
+Help
+
+	This documentation is displayed when supplying the --help (or
+	-h or -?) argument.
+
+	Note that when this script displays help documentation, all other
+	command line arguments are ignored and no other actions are performed.
+
+HELP
+	printf "$HELP"
 }
 
 #
