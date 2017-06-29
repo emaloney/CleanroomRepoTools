@@ -341,7 +341,6 @@ processDirectory "$SKELETON_TYPE"
 
 cd "$REPO_ROOT"
 
-USE_GIT=0
 if [[ ! -d "$NEW_REPO_NAME/.git" ]]; then
 	# we need to create the repo first because the freshenRepo.sh script below
 	# requires the git repo to already have been created & have at least 1 commit
