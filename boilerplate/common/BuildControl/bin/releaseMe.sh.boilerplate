@@ -228,7 +228,7 @@ updateStatus()
 summarize()
 {
 	if [[ $$SUMMARIZE ]]; then
-		printf "\t...%s\n" "$$1"
+		printf "^q(\t)...%s^q(\n)" "$$1"
 	fi
 }
 
