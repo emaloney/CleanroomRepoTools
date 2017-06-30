@@ -15,7 +15,8 @@ REAL_PLATFORMS=${POSSIBLE_PLATFORMS[@]:0:${#POSSIBLE_PLATFORMS[@]}-1}
 POSSIBLE_PLATFORMS_STR=`echo -n "${POSSIBLE_PLATFORMS[@]}"`
 POSSIBLE_PLATFORMS_PARAM=`echo $POSSIBLE_PLATFORMS_STR | sed 's/ /|/g'`
 REPO_BRANCH=master
-SKELETON_TYPE=framework
+DEFAULT_SKELETON_TYPE=framework
+SKELETON_TYPE=$DEFAULT_SKELETON_TYPE
 
 #
 # parse the command-line arguments
@@ -157,19 +158,15 @@ showHelp()
 	define HELP <<HELP
 $SCRIPT_NAME
 
-	Creates a skeleton Xcode project structure with standard build settings 
-	ideal for creating a Swift dynamic framework.
+	Creates a skeleton Xcode project structure.
 
-	With this script, you can be up and running building cross-platform
-	Swift dynamic frameworks in no time. Just write your code and go.
-
-	The script creates a new directory <project-name> inside the
-	<destination-dir> and populates it with an Xcode project file
-	containing one or more framework build targets (one for each
-	platform to be supported) and stub code.
-
-	Once the project directory has been created, it will then be
-	initialized as a git repo.
+	The script creates a new directory <project-name> (if necessary) inside
+	the <destination-dir> and populates it with an Xcode project structure
+	based on a given skeleton type.
+	
+	If the <project-name> directory was newly-created, or if it has not yet
+	been initialized as a git repo, it will then be initialized, and the
+	new files will be committed.
 
 Usage:
 
@@ -185,35 +182,73 @@ Required arguments:
 
 Optional arguments:
 
+	--type <skeleton-type>
+	
+		Specifies the skeleton type to use for populating the repo.
+		
+		Currently supported skelentons are:
+		
+$SKELETON_LIST
+
+		If the skeleton type is not explicitly specified, the value
+		"$DEFAULT_SKELETON_TYPE" will be used by default.
+
 	--dest <destination-dir>
 
-		The --dest (or -d) argument accepts a filesystem path
-		specifying the directory in which the project repo will
-		be created.
+		The --dest (also --root or -d) argument accepts a filesystem path 
+		specifying the directory in which the project repo will be created.
 
-		If this argument is not provided, newly-created repos will
-		be placed within:
+		If this argument is not provided, newly-created repos will be placed
+		within:
 
 			${DEFAULT_REPO_ROOT}
 
 	--platform ($POSSIBLE_PLATFORMS_PARAM)
 
-		The --platform (or -p) argument accepts a platform specifier
-		that governs which platform(s) will be supported by the project
-		file to be created. The value 'all' specifies all supported
-		platforms. If no value for the --platform argument is provided,
-		'all' is assumed; let's be cross-platform by default!
+		The --platform (or -p) argument accepts a platform specifier that
+		governs which platform(s) will be supported by the project file to
+		be created. The value 'all' specifies all supported platforms. If no
+		value for the --platform argument is provided, 'all' is assumed; 
+		let's be cross-platform by default!
+
+	--decl <location>
+
+		Specifies the location of the repo declaration file(s) to use.
+		
+		<location> may be a directory containing multiple repo declaration
+		files, or it may be the path to a file containing the declaration.
+		
+		By default, the script searches within its 'repos' directory for a
+		matching file. This can be overriden by explicitly specifying a 
+		different declaration location to use.
+		
+		Note that specifying a repo declaration file (as opposed to a directory)
+		can only be done when running against a single repo. Attempting to use
+		more than one target repo with a declaration file will fail.
+
+	--branch <branch> 
+	
+		The --branch (or -b) argument specifies that <branch> should be used 
+		for git operations.
+		
+		If this value is not present, 'master' is used as the branch.
+
+	--commit-message-file <file>
+	
+		Specifies the path to a file containing the commit message to be used
+		as the message for the initial commit when creating a new repo.
+		The shorthand form of this argument is -m <file>.
 
 	--force
 
-		By default, the script won't run if the destination directory
-		already contains a file named <project-name>. Using --force (or
-		-f) overrides this check, allowing the script to proceed.
+		By default, the script won't run if the destination directory already
+		contains a file named <project-name>. Using --force (or -f) overrides 
+		this check, allowing the script to proceed.
 
 Help
 
-	This documentation is displayed when supplying the --help (or
-	-h or -?) argument.
+	This documentation is displayed when supplying the --help (or -h or -?)
+	argument.
 
 	Note that when this script displays help documentation, all other
 	command line arguments are ignored and no other actions are performed.
@@ -364,7 +399,7 @@ fi
 expectReposOnBranch "$REPO_BRANCH" "$NEW_REPO_NAME"
 
 echo "Generating boilerplate files"
-"${SCRIPT_DIR}/freshenRepo.sh" --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT" --type "$SKELETON_TYPE" $DECL_ARG
+"${SCRIPT_DIR}/freshenRepo.sh" "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT" --type "$SKELETON_TYPE" $DECL_ARG
 
 pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 

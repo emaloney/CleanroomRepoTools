@@ -39,8 +39,8 @@ $CLEANROOM_REPO_LIST
 
 Help
 
-	This documentation is displayed when supplying the --help (or
-	-h or -?) argument.
+	This documentation is displayed when supplying the --help (or -h or -?)
+	argument.
 
 	Note that when this script displays help documentation, all other
 	command line arguments are ignored and no other actions are performed.
@@ -106,7 +106,11 @@ while [[ $1 ]]; do
 		;;
 		
 	*)
-		ARGS+=($1)
+		if [[ -z $ARGS ]]; then
+			ARGS=$1		
+		else
+			ARGS="$ARGS $$1"
+		fi
 		;;
 	esac
 	shift

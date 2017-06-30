@@ -129,6 +129,9 @@ stripBoilerplateDirectory()
 	echo $STRIPPED
 }
 
+#
+# find the known repos
+#
 CLEANROOM_REPOS=()
 for f in "$SCRIPT_DIR/../repos/"*.xml; do
 	CLEANROOM_REPOS+=(`basename "$f" | sed "s/^repos\///" | sed "s/.xml$//"`)
@@ -141,3 +144,13 @@ PLIST_BUDDY=/usr/libexec/PlistBuddy
 if [[ ! -x "$PLIST_BUDDY" ]]; then
 	exitWithErrorSuggestHelp "Expected to find PlistBuddy at path $PLIST_BUDDY"
 fi
+
+#
+# find the known skeletons
+#
+SKELETONS=()
+for f in "$SCRIPT_DIR/../skeletons/"*; do
+	if [[ -d "$f" ]]; then
+		SKELETONS+=(`basename "$f"`)
+	fi
+done

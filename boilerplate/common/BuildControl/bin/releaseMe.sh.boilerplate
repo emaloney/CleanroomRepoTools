@@ -20,14 +20,14 @@ $$SCRIPT_NAME
 	
 Usage:
 
-	$$SCRIPT_NAME <release-type> [OPTIONS]
+	$$SCRIPT_NAME <release-type> [...]
 	
 Where:
 
-	<release-type> is 'major', 'minor' or 'patch', depending on which portion of the 
-		version number should be incremented for this release.
+	<release-type> is 'major', 'minor' or 'patch', depending on which portion
+		of the version number should be incremented for this release.
 
-OPTIONS may include:
+Optional arguments:
 
 		--set-version <version>
 			Make <version> the version number being released
@@ -40,6 +40,15 @@ OPTIONS may include:
 
 		--push
 			Push all changes upon success
+
+		--amend
+			Causes any commits to be amends to the previous commit
+		
+		--branch <branch>
+			Specifies <branch> be used as the git branch for operations
+		
+		--commit-message-file <file>
+			Specifies the contents <file> should be used as the commit message
 
 		--no-commit
 			Skips committing any changes; implies --no-tag
@@ -64,8 +73,14 @@ OPTIONS may include:
 
 		--dry-run
 			Show commands to be executed instead of executing them
+		
+		--quiet
+			Silences output
+			
+		--summarize
+			Minimizes output (ideal for invoking from other scripts)
 
-	Further detail about these options can be found below.
+	Further detail can be found below.
 
 How it works
 
