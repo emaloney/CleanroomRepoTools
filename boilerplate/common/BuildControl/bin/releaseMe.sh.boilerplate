@@ -582,14 +582,14 @@ updateStatus "Adjusting version numbers"
 executeCommand "$$PLIST_BUDDY \"$$FRAMEWORK_PLIST_PATH\" -c \"Set :CFBundleShortVersionString $$VERSION\""
 agvtool bump > /dev/null
 summarize "bumped version to $$VERSION from $$CURRENT_VERSION for $$RELEASE_TYPE release"
-
+^if($project:exposesAPI|
 if [[ ! $$SKIP_DOCUMENTATION ]]; then
 	updateStatus "Rebuilding documentation"
 	summarize "building documentation"
 	"$$SCRIPT_DIR/generateDocumentationForAPI.sh" $$QUIET_ARG
 	executeCommand "git add Documentation/."
 fi
-
+)
 #
 # commit changes
 #
