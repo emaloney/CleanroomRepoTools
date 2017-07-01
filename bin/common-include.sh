@@ -49,7 +49,7 @@ executeCommand()
 	else
 		eval "$1"
 		if [[ $? != 0 ]]; then
-			exitWithError "Command failed"
+			exitWithError "Command failed: $1"
 		fi
 	fi
 }
