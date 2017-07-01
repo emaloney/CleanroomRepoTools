@@ -399,7 +399,7 @@ fi
 expectReposOnBranch "$REPO_BRANCH" "$NEW_REPO_NAME"
 
 echo "Generating boilerplate files"
-"${SCRIPT_DIR}/freshenRepo.sh" "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT" --type "$SKELETON_TYPE" $DECL_ARG
+"${SCRIPT_DIR}/freshenRepo.sh" --repo "$NEW_REPO_NAME" $FORCE_ARG $REPO_BRANCH_ARG --root "$REPO_ROOT" --type "$SKELETON_TYPE" $DECL_ARG
 
 pushd "$REPO_ROOT/$NEW_REPO_NAME" > /dev/null
 

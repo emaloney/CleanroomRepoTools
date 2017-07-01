@@ -64,7 +64,6 @@ while [[ $1 ]]; do
 		;;
 	
 	--repo|-r)
- 		REPOS_SPECIFIED=1
  		while [[ $2 ]]; do
  			case $2 in
  			-*)
@@ -85,10 +84,6 @@ while [[ $1 ]]; do
  			shift
  		fi
 		;;
- 		
- 	--all|-a)
-		ALL_REPOS_FLAG=1
-		;;
 	
 	--branch|-b)
 		if [[ $2 ]]; then
@@ -106,11 +101,7 @@ while [[ $1 ]]; do
 		;;
 		
 	*)
-		if [[ -z $ARGS ]]; then
-			ARGS=$1		
-		else
-			ARGS="$ARGS $$1"
-		fi
+		ARGS+=($1)
 		;;
 	esac
 	shift
@@ -128,17 +119,6 @@ export REPO_ROOT
 #
 # validate the input
 #
-if [[ $REPOS_SPECIFIED && $ALL_REPOS_FLAG ]]; then
-	exitWithErrorSuggestHelp "--repo|-r and --all|-a are mutually exclusive; they may not both be specified at the same time"
-fi
-if [[ ! $REPOS_SPECIFIED ]]; then
-	if [[ ! $ALL_REPOS_FLAG ]]; then
-		exitWithErrorSuggestHelp "If no --repo|-r values were specified, --all|-a must be specified"
-	fi
-
-	REPO_LIST=${CLEANROOM_REPOS[@]}
-fi
-
 if [[ ${#REPO_LIST[@]} < 1 ]]; then
 	exitWithErrorSuggestHelp "At least one repo must be specified"
 fi
@@ -176,7 +156,7 @@ fi
 SRCDIR="${SCRIPT_DIR}/.."
 for r in ${REPO_LIST[@]}; do
 	RENAMED_ITEM=$( echo "$DESTITEM" | sed sq^_q.q )
-	echo "Copying $SRCITEM to $r/${DESTITEM}"
+	echo "Copying $SRCITEM to $DESTITEM for $r"
 	mkdir -p "$REPO_ROOT/$r/$DESTDIR"
 	executeCommand "cp -${CP_ARGS}R \"${SRCDIR}/${SRCITEM}\" \"$REPO_ROOT/$r/$DESTITEM\""
 	if [[ "$DESTITEM" != "$RENAMED_ITEM" ]]; then

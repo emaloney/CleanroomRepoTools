@@ -99,6 +99,21 @@ HELP
 
 while [[ $1 ]]; do
 	case $1 in
+	--repo|-r)
+ 		while [[ $2 ]]; do
+ 			case $2 in
+ 			-*)
+ 				break
+ 				;;
+ 				
+ 			*)
+				REPO_LIST+=($2)
+				shift
+				;;	
+ 			esac
+ 		done
+ 		;;
+
 	--root)
 		if [[ $2 ]]; then
  			REPO_ROOT=$2
@@ -150,15 +165,6 @@ while [[ $1 ]]; do
 	--help|-h|-\?)
 		SHOW_HELP=1
 		;;
-		
-	-*)
-		exitWithErrorSuggestHelp "Unrecognized argument: $1"
-		;;
-		
-	*)
-		REPO_LIST+=($1)
-		;;
-
 	esac
 	shift
 done
@@ -213,8 +219,11 @@ processStandardFile()
 	
 	OUTPUT_FILE=`stripBoilerplateDirectory "$1"`
 
-	executeCommand "./copyToCleanroomRepos.sh \"$1\" \"$OUTPUT_FILE\" $COPY_ARGS"
-
+	./copyToCleanroomRepos.sh \"$1\" \"$OUTPUT_FILE\" $COPY_ARGS
+	if [[ $? != 0 ]]; then
+		exitWithError "Failed to copy $1 to $OUTPUT_FILE"
+	fi
+	
 	popd > /dev/null
 }
 
