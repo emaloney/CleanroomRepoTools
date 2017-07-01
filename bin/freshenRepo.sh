@@ -171,7 +171,7 @@ if [[ $SHOW_HELP == 1 ]]; then
 fi
 
 if [[ ${#REPO_LIST[@]} < 1 ]]; then
-	exitWithErrorSuggestHelp "At least one repo must be specified"
+	exitWithErrorSuggestHelp "Must specify one or more repos to freshen using the --repo (or -r) argument"
 fi
 
 if [[ ${#REPO_LIST[@]} > 1 && ! -d "$REPO_DECL_FILE" ]]; then
