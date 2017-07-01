@@ -15,7 +15,6 @@ BRANCH=master
 FILE_LIST=()
 REPO_LIST=()
 REPO_ROOT="$PWD/.."
-REPO_DECL_FILE="repos/${r}.xml"
 SKELETON_TYPE=framework
 
 while [[ $1 ]]; do
@@ -254,8 +253,13 @@ for f in ${FILE_LIST[@]}; do
 			FRAMEWORK_VERSION_PUBLIC=`echo $FRAMEWORK_VERSION | sed "sq\.[0-9]*\\$qq"`
 		fi
 		export FRAMEWORK_VERSION_PUBLIC
-		if [[ -r "$REPO_DECL_FILE" ]]; then
-			mkdir -p "$REPO_ROOT/$r/$OUTPUT_BASE" && ./bin/plate -t "$f" -d "$REPO_DECL_FILE" -m include/repos.xml -o "$REPO_ROOT/$r/$OUTPUT_FILE"
+		if [[ $REPO_DECL_FILE ]]; then
+			DECL_FILE="$REPO_DECL_FILE"
+		else
+			DECL_FILE="repos/${r}.xml"
+		fi
+		if [[ -r "$DECL_FILE" ]]; then
+			mkdir -p "$REPO_ROOT/$r/$OUTPUT_BASE" && ./bin/plate -t "$f" -d "$DECL_FILE" -m include/repos.xml -o "$REPO_ROOT/$r/$OUTPUT_FILE"
 			if [[ "$?" != 0 ]]; then
 				exit 5
 			fi
@@ -264,7 +268,7 @@ for f in ${FILE_LIST[@]}; do
 			fi
 			printf " (done!)\n"
 		else
-			printf "\n        !!! ERROR: Required file $REPO_DECL_FILE not found\n        !!! Couldn't generate $OUTPUT_FILE for $r\n"
+			printf "\n        !!! ERROR: Required file $DECL_FILE not found\n        !!! Couldn't generate $OUTPUT_FILE for $r\n"
 		fi
 	done
 done
