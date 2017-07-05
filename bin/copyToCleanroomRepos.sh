@@ -151,15 +151,24 @@ if [[ $FORCE_MODE ]]; then
 	CP_ARGS="f"
 else
 	CP_ARGS="i"
+	IGNORE_FAILS=1
 fi
+
+issueCopyCommand()
+{
+	eval "$1"
+	if [[ $? != 0 && ! $IGNORE_FAILS ]]; then
+		echo "Command failed with exit code $?: $1"
+	fi
+}
 
 SRCDIR="${SCRIPT_DIR}/.."
 for r in ${REPO_LIST[@]}; do
 	RENAMED_ITEM=$( echo "$DESTITEM" | sed sq^_q.q )
 	echo "Copying $SRCITEM to $DESTITEM for $r"
 	mkdir -p "$REPO_ROOT/$r/$DESTDIR"
-	executeCommand "cp -${CP_ARGS}R \"${SRCDIR}/${SRCITEM}\" \"$REPO_ROOT/$r/$DESTITEM\""
+	issueCopyCommand "cp -${CP_ARGS}R \"${SRCDIR}/${SRCITEM}\" \"$REPO_ROOT/$r/$DESTITEM\""
 	if [[ "$DESTITEM" != "$RENAMED_ITEM" ]]; then
-		executeCommand "mv -f \"$REPO_ROOT/$r/${DESTITEM}\" \"$REPO_ROOT/$r/${RENAMED_ITEM}\""
+		issueCopyCommand "mv -${CP_ARGS} \"$REPO_ROOT/$r/${DESTITEM}\" \"$REPO_ROOT/$r/${RENAMED_ITEM}\""
 	fi
 done
