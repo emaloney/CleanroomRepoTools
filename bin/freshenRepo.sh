@@ -219,7 +219,7 @@ processStandardFile()
 	
 	OUTPUT_FILE=`stripBoilerplateDirectory "$1"`
 
-	./copyToCleanroomRepos.sh \"$1\" \"$OUTPUT_FILE\" $COPY_ARGS
+	./copyToCleanroomRepos.sh "$1" "$OUTPUT_FILE" $COPY_ARGS
 	if [[ $? != 0 ]]; then
 		exitWithError "Failed to copy $1 to $OUTPUT_FILE"
 	fi
