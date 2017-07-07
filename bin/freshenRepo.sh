@@ -12,7 +12,7 @@ source bin/common-include.sh
 
 REPO_LIST=()
 BRANCH=master
-DEFAULT_REPO_ROOT="$PWD/.."
+DEFAULT_REPO_ROOT=$( echo $(cd "$PWD/.." ; echo "$PWD") | sed s@^$HOME@~@ )
 REPO_ROOT="$DEFAULT_REPO_ROOT"
 REPO_DECL_FILE="$PWD/repos"
 DEFAULT_SKELETON_TYPE=framework
@@ -20,8 +20,6 @@ SKELETON_TYPE=$DEFAULT_SKELETON_TYPE
 
 showHelp()
 {
-	SKELETON_LIST=`printf "\t\t\t%s\n" ${SKELETONS[@]}`
-
 	define HELP <<HELP
 $SCRIPT_NAME
 
@@ -30,22 +28,22 @@ $SCRIPT_NAME
 	
 Usage:
 
-	$SCRIPT_NAME <repo-list>
+	$SCRIPT_NAME --repo <repo-list>
 	
-Where:
+Required arguments:
 
-	<repo-list>
+	--repo (-r) <repo-list>
 	
 		Specifies one or more repos to freshen. When specifying multiple repos
 		in the list, spaces are used to separate the names.
 
 Optional arguments:
 
-	--type <skeleton-type>
+	--type (-t) <skeleton-type>
 	
 		Specifies the skeleton type to use for populating the repo.
 		
-		Currently supported skelentons are:
+		Currently supported skeletons are:
 		
 $SKELETON_LIST
 
@@ -53,37 +51,44 @@ $SKELETON_LIST
 		"$DEFAULT_SKELETON_TYPE" will be used by default.
 
 	--root <directory>
-	
-		Specifies that <directory> be used as the root directory in which
-		to find the repo(s) to freshen.
+
+		Specifies <directory> as the location in which the repo(s) can be
+		found. If --root is not specified, the script will use:
+		
+		$DEFAULT_REPO_ROOT
 	
 	--decl <location>
 
 		Specifies the location of the repo declaration file(s) to use.
 		
 		<location> may be a directory containing multiple repo declaration
-		files, or it may be the path to a file containing the declaration.
-		
-		By default, the script searches within its 'repos' directory for a
-		matching file. This can be overriden by explicitly specifying a 
-		different declaration location to use.
-		
-		Note that specifying a repo declaration file (as opposed to a directory)
-		can only be done when running against a single repo. Attempting to use
-		more than one target repo with a declaration file will fail.
+		files, or it may be a file containing the declaration for a single
+		repo. If <location> is a file, then the <repo-list> passed to the 
+		--repo (or -r) argument must contain only one repo.
 
-	--branch <branch> 
+		A repo declaration is a Mockingbird MBML (*.xml) file containing 
+		metadata describing a given repo. By convention, these files have the
+		same name as the repo itself. (A declaration file for this repo would
+		be named "$( cd "$SCRIPT_DIR/.." ; echo `basename $PWD` ).xml", for example.)
+		
+		If --decl is not specified, the script will search for an appropriate 
+		file as needed within:
+		
+		$( echo $(cd "$PWD/repos" ; echo "$PWD") | sed s@^$HOME@~@ )
+
+	--branch (-b) <branch>
 	
-		The --branch (or -b) argument specifies that <branch> should be used 
-		for git operations.
+		As a safety measure, the script will fail if all repos involved in an
+		operation are not on the same branch at the time of execution. 
+
+		By default, the branch is assumed to be master. Using this argument
+		overrides that and uses <branch> insead.
 		
-		If this value is not present, 'master' is used as the branch.
-		
- 	--force
+ 	--force (-f)
  	
  		By default, if a destination repo contains a file that would be 
- 		overwritten, user confirmation is requested first. Using --force (or
- 		-f) causes files to be overwritten without confirmation.
+ 		overwritten, user confirmation is requested first. Using this flag
+ 		causes files to be overwritten without confirmation.
 
 Help
 
@@ -94,7 +99,7 @@ Help
 	command line arguments are ignored and no other actions are performed.
 
 HELP
-	printf "$HELP"
+	printf "$HELP" | less
 }
 
 while [[ $1 ]]; do

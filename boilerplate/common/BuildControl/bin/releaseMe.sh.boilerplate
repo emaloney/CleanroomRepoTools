@@ -189,7 +189,7 @@ Help
 	command line arguments are ignored and no other actions are performed.
 
 HELP
-	printf "$$HELP"
+	printf "$$HELP" | less
 }
 
 printError()

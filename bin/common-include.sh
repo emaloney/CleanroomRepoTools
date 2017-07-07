@@ -154,3 +154,4 @@ for f in "$SCRIPT_DIR/../skeletons/"*; do
 		SKELETONS+=(`basename "$f"`)
 	fi
 done
+SKELETON_LIST=`printf "\t\t\t%s\n" ${SKELETONS[@]}`

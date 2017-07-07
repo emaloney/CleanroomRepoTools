@@ -7,13 +7,13 @@ cd "$SCRIPT_DIR"
 source common-include.sh
 
 PLATE_BIN="$SCRIPT_DIR/plate"
-REPO_ROOT="$SCRIPT_DIR/../.."
+DEFAULT_REPO_ROOT=$( echo $( cd "$SCRIPT_DIR/../.."; echo "$PWD" ) | sed s@^$HOME@~@ )
+REPO_ROOT="$DEFAULT_REPO_ROOT"
 REPO_DECL_FILE="$SCRIPT_DIR/../repos/${NEW_REPO_NAME}.xml"
-DEFAULT_REPO_ROOT=$( cd "$REPO_ROOT"; echo $PWD )
 POSSIBLE_PLATFORMS=( iOS macOS tvOS watchOS all )
+POSSIBLE_PLATFORMS_HORIZONTAL=`echo -n "${POSSIBLE_PLATFORMS[@]}"`
+POSSIBLE_PLATFORMS_VERTICAL=`printf "\t\t\t%s\n" ${POSSIBLE_PLATFORMS[@]}`
 REAL_PLATFORMS=${POSSIBLE_PLATFORMS[@]:0:${#POSSIBLE_PLATFORMS[@]}-1}
-POSSIBLE_PLATFORMS_STR=`echo -n "${POSSIBLE_PLATFORMS[@]}"`
-POSSIBLE_PLATFORMS_PARAM=`echo $POSSIBLE_PLATFORMS_STR | sed 's/ /|/g'`
 REPO_BRANCH=master
 DEFAULT_SKELETON_TYPE=framework
 SKELETON_TYPE=$DEFAULT_SKELETON_TYPE
@@ -158,27 +158,23 @@ showHelp()
 	define HELP <<HELP
 $SCRIPT_NAME
 
-	Creates a skeleton Xcode project structure.
-
-	The script creates a new directory <project-name> (if necessary) inside
-	the <destination-dir> and populates it with an Xcode project structure
-	based on a given skeleton type.
-	
-	If the <project-name> directory was newly-created, or if it has not yet
-	been initialized as a git repo, it will then be initialized, and the
-	new files will be committed.
+	Creates a skeleton Xcode project structure and, if needed, initializes
+	a new git repo to house it.
 
 Usage:
 
-	$SCRIPT_NAME <project-name> (--owner|-o) <github-user-id>
+	$SCRIPT_NAME <project-name> --owner <github-user-id>
 
 Where:
 
-	<project-name> is the name of the project to create.
+	<project-name> is the name of the Xcode project to create. This is also 
+	used as the name of the GitHub repo.
 
 Required arguments:
 
-	<github-user-id> is the GitHub user ID of the repo's owner.
+	--owner (-o) <github-user-id> 
+	
+		Specifies the GitHub user ID of the repo's owner.
 
 Optional arguments:
 
@@ -186,64 +182,71 @@ Optional arguments:
 	
 		Specifies the skeleton type to use for populating the repo.
 		
-		Currently supported skelentons are:
+		Currently supported skeletons are:
 		
 $SKELETON_LIST
 
 		If the skeleton type is not explicitly specified, the value
 		"$DEFAULT_SKELETON_TYPE" will be used by default.
 
-	--dest <destination-dir>
+	--dest (-d) <directory>
 
-		The --dest (also --root or -d) argument accepts a filesystem path 
-		specifying the directory in which the project repo will be created.
+		Specifies <directory> as the destination location in which the new
+		project repo will be placed. If not specified, the script will use:
+		
+		$DEFAULT_REPO_ROOT
 
-		If this argument is not provided, newly-created repos will be placed
-		within:
+		This script also accepts --root as an alias for --dest.
 
-			${DEFAULT_REPO_ROOT}
+	--platform (-p) <platform-list>
+	
+		Generates a project that will build for the platform(s) indicated
+		by <platform-list>, a space-separated list specifying of one or more
+		platforms. Possible values are:
+	
+$POSSIBLE_PLATFORMS_VERTICAL
 
-	--platform ($POSSIBLE_PLATFORMS_PARAM)
-
-		The --platform (or -p) argument accepts a platform specifier that
-		governs which platform(s) will be supported by the project file to
-		be created. The value 'all' specifies all supported platforms. If no
-		value for the --platform argument is provided, 'all' is assumed; 
-		let's be cross-platform by default!
+		Specifying "all" is an alias for supporting all possible platforms. If
+		--platform is not explicitly specified, "all" is assumed; let's be
+		cross-platform by default!
 
 	--decl <location>
 
 		Specifies the location of the repo declaration file(s) to use.
 		
 		<location> may be a directory containing multiple repo declaration
-		files, or it may be the path to a file containing the declaration.
-		
-		By default, the script searches within its 'repos' directory for a
-		matching file. This can be overriden by explicitly specifying a 
-		different declaration location to use.
-		
-		Note that specifying a repo declaration file (as opposed to a directory)
-		can only be done when running against a single repo. Attempting to use
-		more than one target repo with a declaration file will fail.
+		files, or it may be a file containing the declaration for a single
+		repo. If <location> is a file, then the <repo-list> passed to the 
+		--repo (or -r) argument must contain only one repo.
 
-	--branch <branch> 
+		A repo declaration is a Mockingbird MBML (*.xml) file containing 
+		metadata describing a given repo. By convention, these files have the
+		same name as the repo itself. (A declaration file for this repo would
+		be named "$( cd "$SCRIPT_DIR/.." ; echo `basename $PWD` ).xml", for example.)
+		
+		If --decl is not specified, the script will search for an appropriate 
+		file as needed within:
+		
+		$( echo $(cd "$SCRIPT_DIR/../repos" ; echo "$PWD") | sed s@^$HOME@~@ )
+
+	--branch (-b) <branch> 
 	
-		The --branch (or -b) argument specifies that <branch> should be used 
-		for git operations.
-		
-		If this value is not present, 'master' is used as the branch.
+		As a safety measure, the script will fail if all repos involved in an
+		operation are not on the same branch at the time of execution. 
 
-	--commit-message-file <file>
+		By default, the branch is assumed to be master. Using this argument
+		overrides that and uses <branch> insead.
+
+	--commit-message-file (-m) <file>
 	
-		Specifies the path to a file containing the commit message to be used
-		as the message for the initial commit when creating a new repo.
-		The shorthand form of this argument is -m <file>.
+		Specifies the path of a file containing the message to be used for
+		any git commit made.
 
-	--force
+	--force (-f)
 
-		By default, the script won't run if the destination directory already
-		contains a file named <project-name>. Using --force (or -f) overrides 
-		this check, allowing the script to proceed.
+		By default, the script won't run if the directory specified by --dest
+		already contains something named <project-name>. Using --force overrides 
+		this safety check, allowing the script to proceed.
 
 Help
 
@@ -254,7 +257,7 @@ Help
 	command line arguments are ignored and no other actions are performed.
 
 HELP
-	printf "$HELP"
+	printf "$HELP" | less
 }
 
 if [[ $SHOW_HELP ]]; then
@@ -292,7 +295,7 @@ INCLUDE_WATCHOS=0
 for p in "${PLATFORMS[@]}"; do
 	isInArray "$p" ${REAL_PLATFORMS[@]}
 	if [[ $? == 0 ]]; then
-		exitWithErrorSuggestHelp "The value \"$p\" passed to the --platform (-p) argument is not recognized" "Accepted values: $POSSIBLE_PLATFORMS_STR"
+		exitWithErrorSuggestHelp "The value \"$p\" passed to the --platform (-p) argument is not recognized" "Accepted values: $POSSIBLE_PLATFORMS_HORIZONTAL"
 	fi
 
 	case $p in

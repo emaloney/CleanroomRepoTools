@@ -8,35 +8,54 @@ source bin/common-include.sh
 
 showHelp()
 {
-	CLEANROOM_REPO_LIST=`printf "\t\t%s\n" ${CLEANROOM_REPOS[@]}`
-
 	define HELP <<HELP
 $SCRIPT_NAME
 
-	Copies one or more portions of the Cleanroom master repo
-	into one or more parallel Cleanroom Project code repos.
+	Copies files and directories from this $( echo `basename "$PWD"` ) repo
+	into one or more other Cleanroom-style repos.
 
 Usage:
 
-	$SCRIPT_NAME <relative-path> [<relative-path> [...]]
+	$SCRIPT_NAME <file-list> --repo <repo-list>
+
+	Each relative path in <file-list> is recursively copied to the appropriate
+	location in each of the repos in <repo-list>.
 
 Where:
 
-	<relative-path> is the relative path of a file or directory
-	within the instance of the Cleanroom master repository at:
+	<file-list> contains one or more space-separated relative paths
+	referring to files within:
+	
+		$( echo "$PWD" | sed s@^$HOME@~@ )
 
-		$REPO_ROOT_DEFAULT
+	--repo (-r) <repo-list>
+	
+		<repo-list> is a space-separated list of one or more repos to which 
+		the files will be copied.
 
-	Each <relative-path> is recursively copied to the appropriate
-	location in the individual Cleanroom Project repos that exist
-	within:
+Optional arguments:
 
-		$REPO_ROOT_DEFAULT
+	--root <directory>
 
-	The following Cleanroom Project repos have been detected:
+		Specifies <directory> as the location in which the repo(s) can be
+		found. If --root is not specified, the script will use:
+		
+		$DEFAULT_REPO_ROOT
 
-$CLEANROOM_REPO_LIST
+	--branch (-b) <branch> 
+	
+		As a safety measure, the script will fail if all repos involved in an
+		operation are not on the same branch at the time of execution. 
 
+		By default, the branch is assumed to be master. Using this argument
+		overrides that and uses <branch> insead.
+		
+	--force (-f)
+	
+		Normally, when an operation would result in a file being overwritten,
+		the user will be prompted to confirm before proceeding. If --force
+		is specified, files will be overwritten without any user intervention.
+		
 Help
 
 	This documentation is displayed when supplying the --help (or -h or -?)
@@ -46,7 +65,7 @@ Help
 	command line arguments are ignored and no other actions are performed.
 
 HELP
-	printf "$HELP"
+	printf "$HELP" | less
 }
 
 #
@@ -54,8 +73,8 @@ HELP
 #
 ARGS=()
 REPO_LIST=()
-REPO_ROOT_DEFAULT="$PWD/.."
-REPO_ROOT="$REPO_ROOT_DEFAULT"
+DEFAULT_REPO_ROOT=$( echo $(cd "$PWD/.." ; echo "$PWD") | sed s@^$HOME@~@ )
+REPO_ROOT="$DEFAULT_REPO_ROOT"
 BRANCH=master
 while [[ $1 ]]; do
 	case $1 in
