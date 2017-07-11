@@ -142,6 +142,7 @@ In recent years, Mockingbird Library has been developed and maintained by Evan M
 		</Var>
 	</Var>
 	
+	<Var name="project:hasGeneratedDocumentation" type="dynamic" expression="^if(^setContains(^setWithArray(^array(framework|application))|^log($project:skeleton))|#(1)|#(0))"/>
 	<Var name="docs:root" type="dynamic" expression="https://rawgit.com/${repo:owner}/${repo:name}/${repo:branch}/Documentation"/>
 	<Var name="docs:api:root" type="dynamic" expression="${docs:root}/API"/>
 	<Var name="docs:api:index" type="dynamic" expression="${docs:api:root}/index.html"/>
