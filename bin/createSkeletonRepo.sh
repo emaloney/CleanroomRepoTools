@@ -7,7 +7,7 @@ cd "$SCRIPT_DIR"
 source common-include.sh
 
 PLATE_BIN="$SCRIPT_DIR/plate"
-DEFAULT_REPO_ROOT=$( echo $( cd "$SCRIPT_DIR/../.."; echo "$PWD" ) | sed s@^$HOME@~@ )
+DEFAULT_REPO_ROOT=$(cd "$SCRIPT_DIR/../.." ; echo "$PWD")
 REPO_ROOT="$DEFAULT_REPO_ROOT"
 REPO_DECL_FILE="$SCRIPT_DIR/../repos/${NEW_REPO_NAME}.xml"
 POSSIBLE_PLATFORMS=( iOS macOS tvOS watchOS all )

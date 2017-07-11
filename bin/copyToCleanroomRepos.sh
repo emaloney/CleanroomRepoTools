@@ -73,7 +73,7 @@ HELP
 #
 ARGS=()
 REPO_LIST=()
-DEFAULT_REPO_ROOT=$( echo $(cd "$SCRIPT_DIR/../.." ; echo "$PWD") | sed s@^$HOME@~@ )
+DEFAULT_REPO_ROOT=$(cd "$SCRIPT_DIR/../.." ; echo "$PWD")
 REPO_ROOT="$DEFAULT_REPO_ROOT"
 BRANCH=master
 while [[ $1 ]]; do

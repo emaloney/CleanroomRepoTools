@@ -12,7 +12,7 @@ source bin/common-include.sh
 
 REPO_LIST=()
 BRANCH=master
-DEFAULT_REPO_ROOT=$( echo $(cd "$SCRIPT_DIR/../.." ; echo "$PWD") | sed s@^$HOME@~@ )
+DEFAULT_REPO_ROOT=$(cd "$SCRIPT_DIR/../.." ; echo "$PWD")
 REPO_ROOT="$DEFAULT_REPO_ROOT"
 REPO_DECL_FILE="$PWD/repos"
 DEFAULT_SKELETON_TYPE=framework
