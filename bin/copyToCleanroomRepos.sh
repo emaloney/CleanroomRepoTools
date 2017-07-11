@@ -173,28 +173,25 @@ else
 	IGNORE_FAILS=1
 fi
 
-issueCopyCommand()
-{
-	eval "$1"
-	if [[ $? != 0 && ! $IGNORE_FAILS ]]; then
-		echo "Command failed with exit code $?: $1"
-	fi
-}
-
 SRCDIR="${SCRIPT_DIR}/.."
 for r in ${REPO_LIST[@]}; do
 	RENAMED_ITEM=$( echo "$DESTITEM" | sed sq^_q.q )
 	echo "Copying $SRCITEM to $DESTITEM for $r"
 	mkdir -p "$REPO_ROOT/$r/$DESTDIR"
-	issueCopyCommand "cp -${CP_ARGS}R \"${SRCDIR}/${SRCITEM}\" \"$REPO_ROOT/$r/$DESTITEM\""
-	if [[ "$DESTITEM" != "$RENAMED_ITEM" ]]; then
-		echo "Moving $DESTITEM into place at $RENAMED_ITEM"
-		mv -${CP_ARGS} "$REPO_ROOT/$r/${DESTITEM}" "$REPO_ROOT/$r/${RENAMED_ITEM}"
-		if [[ $? != 0 ]]; then
-			rm -rf "$REPO_ROOT/$r/${DESTITEM}"
-			if [[ ! $IGNORE_FAILS ]]; then
+	cp -${CP_ARGS}R "${SRCDIR}/${SRCITEM}" "$REPO_ROOT/$r/$DESTITEM"
+	if [[ $? == 0 ]]; then
+		if [[ "$DESTITEM" != "$RENAMED_ITEM" ]]; then
+			echo "Moving $DESTITEM into place at $RENAMED_ITEM"
+			mv -${CP_ARGS} "$REPO_ROOT/$r/${DESTITEM}" "$REPO_ROOT/$r/${RENAMED_ITEM}"
+			if [[ $? != 0 && ! $IGNORE_FAILS ]]; then
 				echo "Failed to move ${DESTITEM} into place at: $REPO_ROOT/$r/${RENAMED_ITEM}"
 			fi
+			if [[ -e "$REPO_ROOT/$r/${DESTITEM}" ]]; then
+				# if we failed to move the file, clean it up
+				rm -rf "$REPO_ROOT/$r/${DESTITEM}"
+			fi
 		fi
+	elif [[ ! $IGNORE_FAILS ]]; then
+		echo "Command failed with exit code $?: $1"
 	fi
 done
