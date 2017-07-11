@@ -8,6 +8,7 @@
 	<Var name="project:branch:settings" literal="swift3"/>
 	<Var name="project:language" literal="Swift"/>
 	<Var name="project:grouping" literal="Cleanroom"/>
+	<Var name="project:skeleton" literal="framework"/>
 
 	<Var name="project:description">Tools for handling command line arguments in Swift.</Var>
 
