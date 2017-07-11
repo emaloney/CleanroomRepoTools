@@ -27,4 +27,14 @@
         <Var literal="CleanroomLogger"/>
         <Var literal="SwiftPoet"/>
     </Var>
+    
+	<Var name="project:readme:preamble">^q(###) Contents
+
+- [Using the client generator](^q(#)using-the-client-generator)
+- [How it works](^q(#)how-it-works)
+- [In the code](^q(#)in-the-code)
+- [manpage](^q(#)manpage)
+- [Installation](^q(#)installation)
+	</Var>
+
 </MBML>
