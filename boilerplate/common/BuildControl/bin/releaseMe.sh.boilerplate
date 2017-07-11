@@ -475,9 +475,26 @@ fi
 #
 # see if we've got uncommitted changes
 #
-git diff-index --quiet HEAD -- ; REPO_IS_DIRTY=$$?
+git rev-parse --quiet --verify HEAD > /dev/null
+if [[ $$? == 0 ]]; then
+	git diff-index --quiet HEAD -- ; REPO_IS_DIRTY=$$?
+else
+	# if HEAD doesn't exist (which is how we get here), then treat the
+	# repo as if it were dirty
+	REPO_IS_DIRTY=1
+fi
 if [[ $$REPO_IS_DIRTY != 0 && $$(( $$STASH_DIRTY_FILES + $$COMMIT_DIRTY_FILES + $$IGNORE_DIRTY_FILES )) == 0 ]]; then
 	exitWithErrorSuggestHelp "You have uncommitted changes in this repo; won't do anything" "(use --stash-dirty-files, --commit-dirty-files or^q(\n)^q(\t)--ignore-dirty-files to bypass this error)"
+fi
+REPO_URL=`git remote get-url --push origin 2> /dev/null`
+if [[ $$? == 0 ]]; then
+	git ls-remote --heads $$REPO_URL $$BRANCH | grep "refs/heads/$$BRANCH" > /dev/null
+	if [[ $$? == 0 ]]; then
+		REMOTE_BRANCH_EXISTS=1
+	fi
+fi
+if [[ ! $$REMOTE_BRANCH_EXISTS ]]; then
+	GIT_PUSH_ARGS="--set-upstream origin $$BRANCH"
 fi
 
 confirmationPrompt "Releasing $$REPO_NAME $$VERSION (current is $$CURRENT_VERSION)"
@@ -595,7 +612,7 @@ fi
 #
 # rebase with existing changes if needed
 #
-if [[ $$REBASE ]]; then
+if [[ $$REBASE && $$REMOTE_BRANCH_EXISTS ]]; then
 	updateStatus "Rebasing with existing $$BRANCH branch"
 	executeCommand "git pull origin $$BRANCH $$QUIET_ARG --rebase --allow-unrelated-histories --strategy=recursive -Xtheirs"
 	summarize "rebased \"$$BRANCH\" branch"
@@ -619,7 +636,7 @@ fi
 if [[ $$PUSH_WHEN_DONE && -z $$NO_COMMIT ]]; then
 	ORIGIN_URL=`git remote get-url --push origin`
 	updateStatus "Pushing changes to \"$$BRANCH\" branch of $$ORIGIN_URL"
-	executeCommand "git push $$QUIET_ARG"
+	executeCommand "git push $$QUIET_ARG $$GIT_PUSH_ARGS"
 	if [[ $$TAG_WHEN_DONE && !$$NO_TAG ]]; then
 		executeCommand "git push --tags $$QUIET_ARG"
 	fi
