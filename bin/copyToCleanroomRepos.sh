@@ -58,8 +58,8 @@ Optional arguments:
 		
 Help
 
-	This documentation is displayed when supplying the --help (or -h or -?)
-	argument.
+	This documentation is displayed when supplying the --help (or -help, -h,
+	or -?) argument.
 
 	Note that when this script displays help documentation, all other
 	command line arguments are ignored and no other actions are performed.
@@ -78,7 +78,7 @@ REPO_ROOT="$DEFAULT_REPO_ROOT"
 BRANCH=master
 while [[ $1 ]]; do
 	case $1 in
-	--help|-h|-\?)
+	--help|-help|-h|-\?)
 		SHOW_HELP=1
 		;;
 	
