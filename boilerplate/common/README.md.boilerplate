@@ -45,7 +45,7 @@ $project:name is distributed under [the $project:license license](${repo:url:hom
 $project:name is provided for your use—free-of-charge—on an as-is basis. We make no guarantees, promises or apologies. *Caveat developer.*
 
 
-)^q(###) Adding $project:name to your project
+)^if(^test(^log($project:skeleton) == framework)|^q(###) Adding $project:name to your project
 
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 
@@ -67,7 +67,7 @@ $project:import:block
 
 See [the Integration document](${repo:url:home}/blob/${repo:branch}/INTEGRATION.md) for additional details on integrating $project:name into your project.
 
-^if($project:readme:examples|^if($project:language == ObjC|
+)^if($project:readme:examples|^if($project:language == ObjC|
 ^q(##) ${project:name} Reference
 
 )$project:readme:examples
