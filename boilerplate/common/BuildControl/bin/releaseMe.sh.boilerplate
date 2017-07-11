@@ -76,9 +76,6 @@ Optional arguments:
 		--skip-tests
 			Skips running the unit tests :-(
 
-		--dry-run
-			Show commands to be executed instead of executing them
-		
 		--quiet
 			Silences output
 			
@@ -174,12 +171,6 @@ Releasing with uncommitted changes
 	Note that these options are mutually exclusive and may not be
 	used with each other.
 
-Dry run mode
-
-	Using the --dry-run argument prevents the release from occurring
-	and instead shows what would occur if the release were to be
-	executed using the supplied command-line arguments.
-
 Help
 
 	This documentation is displayed when supplying the --help (or -help, -h,
@@ -255,26 +246,15 @@ confirmationPrompt()
 
 executeCommand()
 {
-	if [[ $$DRY_RUN_MODE ]]; then
-		if [[ ! $$DID_DRY_RUN_MSG ]]; then
-			printf "^q(\t)!!! DRY RUN MODE - Will only show commands, not execute them !!!^q(\n)"
-			echo
-			DID_DRY_RUN_MSG=1
-		fi
-		echo "> executing: "
-		echo
-		echo "	set -o pipefail && $$1"
+	unset _CMD
+	if [[ $$QUIET ]]; then
+		_CMD="set -o pipefail && $$1 > /dev/null"
 	else
-		unset _CMD
-		if [[ $$QUIET ]]; then
-			_CMD="set -o pipefail && $$1 > /dev/null"
-		else
-			_CMD="set -o pipefail && $$1"
-		fi
-		eval $$_CMD
-		if [[ $$? != 0 ]]; then
-			exitWithError "Command failed: $$_CMD"
-		fi
+		_CMD="set -o pipefail && $$1"
+	fi
+	eval $$_CMD
+	if [[ $$? != 0 ]]; then
+		exitWithError "Command failed: $$_CMD"
 	fi
 }
 
@@ -387,10 +367,6 @@ while [[ $$1 ]]; do
 	
 	--rebase)
 		REBASE=1
-		;;
-		
-	--dry-run)
-		DRY_RUN_MODE=1
 		;;
 	
 	--help|-help|-h|-\?)
