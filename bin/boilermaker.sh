@@ -252,17 +252,17 @@ for f in ${FILE_LIST[@]}; do
 		printf "    ...for the $r repo"
 		PLIST_FILE_PATH="$REPO_ROOT/$r/BuildControl/Info-Target.plist"
 		if [[ -f "$PLIST_FILE_PATH" ]]; then
-			FRAMEWORK_VERSION=`"$PLIST_BUDDY" "$PLIST_FILE_PATH" -c "Print :CFBundleShortVersionString"`
+			PROJECT_VERSION=`"$PLIST_BUDDY" "$PLIST_FILE_PATH" -c "Print :CFBundleShortVersionString"`
 		else
-			FRAMEWORK_VERSION="0.0.0"
+			PROJECT_VERSION="0.0.0"
 		fi
-		export FRAMEWORK_VERSION
+		export PROJECT_VERSION
 		if [[ "$VERSION" ]]; then
-			FRAMEWORK_VERSION_PUBLIC="$VERSION"
+			PROJECT_VERSION_PUBLIC="$VERSION"
 		else
-			FRAMEWORK_VERSION_PUBLIC=`echo $FRAMEWORK_VERSION | sed "sq\.[0-9]*\\$qq"`
+			PROJECT_VERSION_PUBLIC=`echo $PROJECT_VERSION | sed "sq\.[0-9]*\\$qq"`
 		fi
-		export FRAMEWORK_VERSION_PUBLIC
+		export PROJECT_VERSION_PUBLIC
 		if [[ $REPO_DECL_FILE ]]; then
 			DECL_FILE="$REPO_DECL_FILE"
 		else

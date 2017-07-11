@@ -91,8 +91,8 @@
 	<Var name="platform:minimum:tvOS" type="dynamic" expression="^if($project:platform:versions[minimum][tvOS]|$project:platform:versions[minimum][tvOS]|$versions[$repo:branch:settings][minimum][tvOS])"/>
 	<Var name="platform:minimum:watchOS" type="dynamic" expression="^if($project:platform:versions[minimum][watchOS]|$project:platform:versions[minimum][watchOS]|$versions[$repo:branch:settings][minimum][watchOS])"/>
 
-	<Var name="project:version" value="$ENV[FRAMEWORK_VERSION]"/> <!-- expect calling script to set this environment variable -->
-	<Var name="project:version:public" value="$ENV[FRAMEWORK_VERSION_PUBLIC]"/> <!-- expect calling script to set this environment variable -->
+	<Var name="project:version" value="$ENV[PROJECT_VERSION]"/> <!-- expect calling script to set this environment variable -->
+	<Var name="project:version:public" value="$ENV[PROJECT_VERSION_PUBLIC]"/> <!-- expect calling script to set this environment variable -->
 	<Var name="project:file" type="dynamic" expression="${project:name}.xcodeproj"/>
 	<Var name="project:workspace" type="dynamic" expression="${project:name}.xcworkspace"/>
 	<Var name="project:hasWorkspace" type="dynamic" expression="^fileExists(${repo:dir}/${project:workspace})"/>
