@@ -188,6 +188,13 @@ for r in ${REPO_LIST[@]}; do
 	mkdir -p "$REPO_ROOT/$r/$DESTDIR"
 	issueCopyCommand "cp -${CP_ARGS}R \"${SRCDIR}/${SRCITEM}\" \"$REPO_ROOT/$r/$DESTITEM\""
 	if [[ "$DESTITEM" != "$RENAMED_ITEM" ]]; then
-		issueCopyCommand "mv -${CP_ARGS} \"$REPO_ROOT/$r/${DESTITEM}\" \"$REPO_ROOT/$r/${RENAMED_ITEM}\""
+		echo "Moving $DESTITEM into place at $RENAMED_ITEM"
+		mv -${CP_ARGS} "$REPO_ROOT/$r/${DESTITEM}" "$REPO_ROOT/$r/${RENAMED_ITEM}"
+		if [[ $? != 0 ]]; then
+			rm -rf "$REPO_ROOT/$r/${DESTITEM}"
+			if [[ ! $IGNORE_FAILS ]]; then
+				echo "Failed to move ${DESTITEM} into place at: $REPO_ROOT/$r/${RENAMED_ITEM}"
+			fi
+		fi
 	fi
 done
