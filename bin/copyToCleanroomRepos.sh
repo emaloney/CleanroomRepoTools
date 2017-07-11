@@ -26,7 +26,7 @@ Where:
 	<file-list> contains one or more space-separated relative paths
 	referring to files within:
 	
-		$( echo "$PWD" | sed s@^$HOME@~@ )
+		$(formatPathForDisplay "$PWD")
 
 	--repo (-r) <repo-list>
 	
@@ -40,7 +40,7 @@ Optional arguments:
 		Specifies <directory> as the location in which the repo(s) can be
 		found. If --root is not specified, the script will use:
 		
-		$DEFAULT_REPO_ROOT
+		$(formatPathForDisplay "$DEFAULT_REPO_ROOT")
 
 	--branch (-b) <branch> 
 	

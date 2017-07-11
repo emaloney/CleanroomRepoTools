@@ -151,7 +151,7 @@ Optional arguments:
 		Specifies <directory> as the location in which the repo(s) can be
 		found. If --root is not specified, the script will use:
 		
-		$DEFAULT_REPO_ROOT
+		$(formatPathForDisplay "$DEFAULT_REPO_ROOT")
 
 	--type (-t) <skeleton-type>
 	
@@ -181,7 +181,7 @@ $SKELETON_LIST
 		If --decl is not specified, the script will search for an appropriate 
 		file as needed within:
 		
-		$( echo $(cd "$PWD/repos" ; echo "$PWD") | sed s@^$HOME@~@ )
+		$(formatPathForDisplay "$PWD/repos")
 
 	--branch (-b) <branch> 
 	

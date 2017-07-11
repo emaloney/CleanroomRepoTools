@@ -194,7 +194,7 @@ $SKELETON_LIST
 		Specifies <directory> as the destination location in which the new
 		project repo will be placed. If not specified, the script will use:
 		
-		$DEFAULT_REPO_ROOT
+		$(formatPathForDisplay "$DEFAULT_REPO_ROOT")
 
 		This script also accepts --root as an alias for --dest.
 
@@ -227,7 +227,7 @@ $POSSIBLE_PLATFORMS_VERTICAL
 		If --decl is not specified, the script will search for an appropriate 
 		file as needed within:
 		
-		$( echo $(cd "$SCRIPT_DIR/../repos" ; echo "$PWD") | sed s@^$HOME@~@ )
+		$(formatPathForDisplay "$SCRIPT_DIR/../repos")
 
 	--branch (-b) <branch> 
 	

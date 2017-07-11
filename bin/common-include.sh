@@ -123,6 +123,11 @@ isInArray()
 	return 0
 }
 
+formatPathForDisplay()
+{
+	echo $(cd "$1"; echo "$PWD") | sed s@^$HOME/@~/@
+}
+
 stripBoilerplateDirectory()
 {
 	STRIPPED=`echo "$1" | sed -E s#\(boilerplate/common\|boilerplate/$SKELETON_TYPE\)/?##`
