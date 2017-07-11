@@ -108,7 +108,7 @@
 	<Var name="project:import:block" type="dynamic" expression="^if($project:language == ObjC|$project:import:objc:block|$project:import:swift:block)"/>
 
 	<Var name="project:readme:description" type="dynamic" expression="^selectFirstValue($project:description:formats[markdown]|$project:description:formats[text]|$project:description)"/>
-	<Var name="project:readme:examples:file" type="dynamic" expression="../../${repo:name}/Sources/README.md"/>
+	<Var name="project:readme:examples:file" type="dynamic" expression="${repo:dir}/Sources/README.md"/>
 	<Var name="project:readme:examples" type="dynamic" expression="^if(^fileExists($project:readme:examples:file)|^fileContents($project:readme:examples:file))"/>
 	
 	<Var name="project:meta" type="map">
