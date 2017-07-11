@@ -115,6 +115,7 @@ while [[ $1 ]]; do
 done
 
 export REPO_ROOT
+export SKELETON_TYPE
 
 showHelp()
 {
