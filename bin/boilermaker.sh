@@ -14,7 +14,7 @@ source bin/common-include.sh
 BRANCH=master
 FILE_LIST=()
 REPO_LIST=()
-DEFAULT_REPO_ROOT=$( echo $(cd "$PWD/.." ; echo "$PWD") | sed s@^$HOME@~@ )
+DEFAULT_REPO_ROOT=$( echo $(cd "$SCRIPT_DIR/../.." ; echo "$PWD") | sed s@^$HOME@~@ )
 REPO_ROOT="$DEFAULT_REPO_ROOT"
 DEFAULT_SKELETON_TYPE=framework
 SKELETON_TYPE=$DEFAULT_SKELETON_TYPE
