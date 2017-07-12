@@ -76,7 +76,8 @@ See [the Integration document](${repo:url:home}/blob/${repo:branch}/INTEGRATION.
 
 ^if($repo:isPrivate|Open the `Documentation/API/index.html` file locally to view API documentation in your browser.|For detailed information on using $project:name, [API documentation](${docs:api:index}) is available.)
 
-)^if($project:readme:summation|$project:readme:summation
+)
+^if($project:readme:summation|$project:readme:summation
 
 
 )^q(##) About

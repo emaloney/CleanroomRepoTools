@@ -49,9 +49,9 @@ To integrate $project:name in your workspace, you would start by adding the foll
 $docs:carthageSpec
 ```
 
-This specifies that Carthage use the latest version of $project:name that is API-compatible with ${project:version:public}, i.e. any ${project:version:public}.*x* version.
+This specifies that Carthage use the latest version of $project:name that is API-compatible with ${project:version:public}.0, i.e. any ${project:version:public}.*x* version.
 
-**Note:** Be sure to check the [latest releases](${repo:url:http}/releases); there may be a newer version than ${project:version:public} that is no longer API-compatible.
+**Note:** Be sure to check the [latest releases](${repo:url:http}/releases); there may be a newer version than ${project:version:public}.0 that is no longer API-compatible.
 
 ^q(###) 2. Download $project:name using Carthage
 
