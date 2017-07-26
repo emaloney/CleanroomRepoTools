@@ -1,4 +1,4 @@
 github "emaloney/CleanroomConcurrency" ~> 1.6.0
-github "emaloney/CleanroomDataTransactions" ~> 2.1.0
+github "emaloney/CleanroomDataTransactions" ~> 3.0.0
 github "emaloney/CleanroomDateTime" ~> 1.3.0
 
