@@ -18,14 +18,29 @@ PLATFORM="$$2"
 runDestinationForPlatform()
 {
 	case $$1 in
-	iOS) 		echo "$platforms:ci[iOS][runDestination]";;
-	macOS) 		echo "$platforms:ci[macOS][runDestination]";;	
-	tvOS) 		echo "$platforms:ci[tvOS][runDestination]";;
-	watchOS)	echo "$platforms:ci[watchOS][runDestination]";;
+	iOS)
+		SIMULATOR_ID=`xcrun simctl list | grep -v unavailable | grep "iPad Pro" | tail -1 | sed "s/^.*inch) (//" | sed "s/).*$//"`
+		echo "id=$$SIMULATOR_ID"
+		;;
+
+	macOS)
+		echo "platform=macOS"
+		;;
+
+	tvOS)
+		SIMULATOR_ID=`xcrun simctl list | grep -v unavailable | grep "Apple TV" | tail -1 | sed "s/) (.*)\$//" | sed "s/^.*(//"`
+		echo "id=$$SIMULATOR_ID"
+		;;
+
+	watchOS)
+		SIMULATOR_ID=`xcrun simctl list | grep -v unavailable | grep -v "Watch:" | grep "Apple Watch Series" | tail -1 | sed "s/) (.*)\$//" | sed "s/^.*(//"`
+		echo "id=$$SIMULATOR_ID"
+		;;
+
 	esac
 }
 
-case $$OPERATION in 
+case $$OPERATION in
 	build)
 		MAXIMUM_TRIES=1
 		XCODE_ACTION="clean build";;
@@ -54,7 +69,7 @@ while [[ $$THIS_TRY < $$MAXIMUM_TRIES ]]; do
 	if [[ $$MAXIMUM_TRIES > 1 ]]; then
 		echo "Attempt $$THIS_TRY of $$MAXIMUM_TRIES..."
 	fi
-	
+
 	( set -o pipefail && xcodebuild ^if($project:hasWorkspace|-workspace $project:workspace|-project $project:file) -configuration Debug -scheme "${project:name}^if($project:usesPlatformSpecificSchemes|-^q($){PLATFORM})" -destination "$$DESTINATION" -destination-timeout 300 $$XCODE_ACTION 2>&1 ^q(|) tee "${project:name}-$$PLATFORM-$$OPERATION.log" ^q(|) xcpretty )
 	XCODE_RESULT="$${PIPESTATUS[0]}"
 	if [[ "$$XCODE_RESULT" == "0" ]]; then
