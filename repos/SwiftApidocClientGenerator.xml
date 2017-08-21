@@ -2,6 +2,7 @@
 	<Var name="project:name" literal="SwiftApidocClientGenerator"/>
 	<Var name="project:publisher" literal="Gilt Groupe"/>
 	<Var name="repo:owner" literal="gilt"/>
+	<Var name="repo:isPrivate" boolean="T"/>
 	<Var name="project:creator:name" literal="Kyle Dorman"/>
 	<Var name="project:license" literal="MIT"/>
 	<Var name="project:bundlePrefix" literal="com.gilt.cleanroom"/>
@@ -27,7 +28,7 @@
         <Var literal="CleanroomLogger"/>
         <Var literal="SwiftPoet"/>
     </Var>
-    
+
 	<Var name="project:readme:preamble">^q(###) Contents
 
 - [Using the client generator](^q(#)using-the-client-generator)
