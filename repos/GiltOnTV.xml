@@ -1,0 +1,21 @@
+<MBML>
+	<Var name="project:name" literal="GiltOnTV"/>
+	<Var name="project:publisher" literal="Gilt Groupe"/>
+	<Var name="repo:owner" literal="gilt"/>
+	<Var name="project:creator:name" literal="Evan Maloney"/>
+	<Var name="project:bundlePrefix" literal="com.gilt.tvos"/>
+	<Var name="repo:isPrivate" boolean="T"/>
+	<Var name="project:usesPlatformSpecificSchemes" boolean="F"/>
+    <Var name="project:skipUnitTests" boolean="T"/>
+	<Var name="project:language" literal="Swift"/>
+	<Var name="project:grouping" literal="Cleanroom"/>
+	<Var name="project:skeleton" literal="application"/>
+
+	<Var name="project:description">Our Apple TV app</Var>
+
+    <Var name="project:platforms" type="list">
+        <Var literal="tvOS"/>
+    </Var>
+
+	<Var name="travis:build-status-token" literal="xBQCS1qnFwhQd2sTxsyu"/>
+</MBML>
