@@ -2,6 +2,11 @@
 ^if($project:hasWorkspace|xcode_workspace: $project:workspace|xcode_project: $project:file)
 osx_image: $project:travisImage
 
+branches:
+  only:
+    - master
+^join(^list(${branches:nonmaster}|    - ${item})|\n)
+
 git:
   depth: 1
   submodules: false
