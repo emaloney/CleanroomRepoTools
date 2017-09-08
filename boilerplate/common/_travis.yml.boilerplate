@@ -7,7 +7,6 @@ branches:
   only:
     - master
 ^join(^list(${branches:nonmaster}|    - ${item})|\n)
-
 git:
   depth: 1
   submodules: false
