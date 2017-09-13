@@ -18,6 +18,13 @@ Although developed primarily for iOS and tvOS, AppleTart can also be compiled fo
         <Var literal="iOS"/>
         <Var literal="tvOS"/>
     </Var>
-	
+
+	<Var name="project:platform:versions" type="map">
+		<Var name="minimum" type="map">
+			<Var name="iOS" literal="10.0"/>
+			<Var name="tvOS" literal="10.0"/>
+		</Var>
+	</Var>
+
 	<Var name="travis:build-status-token" literal="xBQCS1qnFwhQd2sTxsyu"/>
 </MBML>
