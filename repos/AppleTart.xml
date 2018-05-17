@@ -26,5 +26,5 @@ Although developed primarily for iOS and tvOS, AppleTart can also be compiled fo
 		</Var>
 	</Var>
 
-	<Var name="travis:build-status-token" literal="xBQCS1qnFwhQd2sTxsyu"/>
+	<Var name="travis:build-status-token" literal="MfmQGcUMVTcqsPEGfZyu"/>
 </MBML>
