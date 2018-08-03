@@ -1,0 +1,25 @@
+<MBML>
+	<Var name="project:name" literal="RoninMobileSurveys"/>
+	<Var name="project:publisher" literal="HBC"/>
+	<Var name="repo:owner" literal="saksdirect"/>
+	<Var name="project:creator:name" literal="Nikita Korchagin"/>
+	<Var name="project:bundlePrefix" literal="com.hbc.ronin"/>
+	<Var name="repo:isPrivate" boolean="T"/>
+	<Var name="project:language" literal="Swift"/>
+	<Var name="project:grouping" literal="Ronin"/>
+	<Var name="project:skeleton" literal="framework"/>
+
+	<Var name="project:description">iOS library for mobile surveys</Var>
+
+    <Var name="project:platforms" type="list">
+        <Var literal="iOS"/>
+    </Var>
+
+	<Var name="project:platform:versions" type="map">
+		<Var name="minimum" type="map">
+			<Var name="iOS" literal="10.0"/>
+		</Var>
+	</Var>
+
+	<Var name="travis:build-status-token" literal="xBQCS1qnFwhQd2sTxsyu"/>
+</MBML>
